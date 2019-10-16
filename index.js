@@ -29,7 +29,7 @@ app.get('/data', (req, res) => {
 	});
 });
 
-url     = './data/minitest.txt';
+url     = './data/nodes1000.txt';
 splitby = '	';
 
 graphArray            = core.getArray(core.getTextArray(url), splitby);

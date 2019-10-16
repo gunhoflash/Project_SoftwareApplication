@@ -4,8 +4,9 @@
 <head>
 	<meta charset="utf-8">
 	<style>
-		.links line {
-			stroke-opacity: 0.25;
+		body {
+			height: 100vh;
+			margin: 0;
 		}
 
 		text {
@@ -14,7 +15,8 @@
 		}
 
 		svg {
-			border: 1px solid #999;
+			width: 100%;
+			height: 100%;
 		}
 	</style>
 	
@@ -29,7 +31,7 @@
 	<script>
 		var width  = 1280;
 		var height = 720;
-		var svg    = d3.select("svg").attr("width", width).attr("height", height);
+		var svg    = d3.select("svg");
 		var simulation;
 
 		function dragstarted(d) {
@@ -64,11 +66,16 @@
 					.force("charge", d3.forceManyBody())
 					.force("center", d3.forceCenter(width / 2, height / 2));
 
+					var opacity = 2 / (2 + Math.sqrt(graph.links.length) / 32);
+					console.log("opacity:" + opacity);
 					var link = svg.append("g")
 						.attr("class", "links")
 						.selectAll("line")
 						.data(graph.links)
 						.enter().append("line")
+						.attr("stroke-opacity", function (d) {
+							return d.intersect_ratio * 0.85 + 0.15;
+						})
 						/*.attr("display", function (d) {
 							if (d.intersect_ratio < 0.25) return "none";
 							else return "";
@@ -78,10 +85,11 @@
 						})
 						.attr("stroke", function (d) {
 							var rank = 1 - d.intersect_ratio;
-							var r = (rank <= 0.5) ? (0.5 - rank) * 2 * 255 : 0;
-							var g = (rank >= 0.25 && rank < 0.5) ? (rank - 0.25) * 4 * 255
-									: ((rank >= 0.5 && rank <= 0.75) ? (0.75 - rank) * 4 * 255 : 0);
-							var b = (rank >= 0.5) ? (rank - 0.5) * 2 * 255 : 0;
+							var r = Math.sqrt(1 - rank) * 255;
+							//var g = (rank >= 0.25 && rank < 0.5) ? (rank - 0.25) * 4 * 255
+							//		: ((rank >= 0.5 && rank <= 0.75) ? (0.75 - rank) * 4 * 255 : 0);
+							var g = (rank < 0.2) ? 0 : ((rank < 0.6) ? rank / 0.6 * 240 : Math.sqrt((1 - rank) / 0.4) * 240);
+							var b = (rank > 0.5) ? (rank - 0.5) / 0.5 * 255 : 0;
 							
 							return "rgb(" + Math.floor(r) + "," + Math.floor(g) +","+ Math.floor(b) + ")";
 						});
@@ -91,7 +99,7 @@
 						.selectAll("circle")
 						.data(graph.nodes)
 						.enter().append("circle")
-						.attr("r", function(d) { return Math.log(d.size + 1) + 1; })
+						.attr("r", function(d) { return Math.log(d.size + 1) + 0.5; })
 						.attr("fill", () => "#aa0000")
 						.call(d3.drag()
 							.on("start", dragstarted)
