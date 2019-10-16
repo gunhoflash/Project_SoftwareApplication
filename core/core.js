@@ -123,6 +123,17 @@ getNumberOfOutersection = (array1, array2) => {
 
 exports.pageRank = (url) => {
 	var pageRank_Array=[];
+	var file_array=this.getArray(this.getTextArray("./data/nodes1000.txt"),"	");
+	var num_of_neighbor=this.getNodeSizeArray(file_array);
+	var arr_of_neighbor=this.getNodeSizeNeighborArray(file_array);
+	var pageRank_table=[];
+	var length=num_of_neighbor.length;
+	for(var i=1; i<length+1; i++)
+	{
+		pageRank_table.push([i,num_of_neighbor[i],arr_of_neighbor[i]]);
+	}
+	console.log(pageRank_table);
+
 	return pageRank_Array;
 };
 
