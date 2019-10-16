@@ -120,3 +120,11 @@ getNumberOfIntersection = (array1, array2) => {
 getNumberOfOutersection = (array1, array2) => {
 	return [...new Set([...array1, ...array2])].length;
 };
+
+exports.pageRank = () => {
+
+};
+
+exports.HITS = () => {
+
+};
