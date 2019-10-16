@@ -121,10 +121,12 @@ getNumberOfOutersection = (array1, array2) => {
 	return [...new Set([...array1, ...array2])].length;
 };
 
-exports.pageRank = () => {
-
+exports.pageRank = (url) => {
+	var pageRank_Array=[];
+	return pageRank_Array;
 };
 
-exports.HITS = () => {
-
+exports.HITS = (url) => {
+	var HITS_Array=[];
+	return HITS_Array;
 };
