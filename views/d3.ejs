@@ -76,10 +76,10 @@
 						.attr("stroke-opacity", function (d) {
 							return d.intersect_ratio * 0.85 + 0.15;
 						})
-						/*.attr("display", function (d) {
-							if (d.intersect_ratio < 0.25) return "none";
+						.attr("display", function (d) {
+							if (d.intersect_ratio > 0.0000001 && d.intersect_ratio < 0.4) return "none";
 							else return "";
-						})*/
+						})
 						.attr("stroke-width", function (d) {
 							return Math.sqrt(d.intersect) + 1;
 						})
@@ -99,7 +99,7 @@
 						.selectAll("circle")
 						.data(graph.nodes)
 						.enter().append("circle")
-						.attr("r", function(d) { return Math.log(d.size + 1) + 0.5; })
+						.attr("r", function(d) { return Math.pow(d.size / 32, 2) + 0.2; })//  return Math.log(d.size + 1) + 0.5; })
 						.attr("fill", () => "#aa0000")
 						.call(d3.drag()
 							.on("start", dragstarted)
