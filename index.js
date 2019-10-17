@@ -42,4 +42,4 @@ console.log(`server listen 127.0.0.1:3344`);
 console.log(`${nodeSizeNeighborArray.length} nodes`);
 
 //우빈 중간결과 확인용
-var pageRank_Array=core.pageRank(url);
+var pageRank_Array=core.pageRank(url,0.0001);

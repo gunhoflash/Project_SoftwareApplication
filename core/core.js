@@ -121,7 +121,7 @@ getNumberOfOutersection = (array1, array2) => {
 	return [...new Set([...array1, ...array2])].length;
 };
 
-exports.pageRank = (url) => {
+exports.pageRank = (url, tolerance) => {
 	var pageRank_Array=[];
 	var file_array=this.getArray(this.getTextArray("./data/nodes1000.txt"),"	");
 	var num_of_neighbor=this.getNodeSizeArray(file_array);
@@ -132,10 +132,44 @@ exports.pageRank = (url) => {
 	{
 		pageRank_table.push([i,num_of_neighbor[i],arr_of_neighbor[i]]);
 	}
-	console.log(pageRank_table);
-
+	//console.log(pageRank_table);
+	
+	var beta=0.85;
+	var j=0;
+	var old_R=Array.apply(null,new Array(length)).map(Number.prototype.valueOf,1/length);
+	var new_R=Array.apply(null,new Array(length)).map(Number.prototype.valueOf,0);
+	//console.log(old_R);
+	//console.log(new_R);
+	var err=this.getError(old_R,new_R);
+	while(err>tolerance)
+	{
+		new_R=Array.apply(null,new Array(length)).map(Number.prototype.valueOf,(1-beta)/length);
+		for(i=0; i<length; i++)
+		{
+			for(j=0; j<pageRank_table[i][1]; j++)
+			{
+				new_R[pageRank_table[i][2][j]]+=(beta*old_R[i])/pageRank_table[i][1];
+			}
+		}
+		//console.clear();
+		//console.log(new_R);
+		err=this.getError(old_R,new_R);
+		old_R=new_R;
+	}
+	console.log(err);
+	console.log("out of loop");
+	console.log(old_R);
 	return pageRank_Array;
 };
+
+exports.getError = (arr1,arr2) => {
+	var error=0;
+	for(var i=0; i<arr1.length; i++)
+	{
+		error+=Math.abs(arr1[i]-arr2[i]);
+	}
+	return error;
+}
 
 exports.HITS = (url) => {
 	var HITS_Array=[];
