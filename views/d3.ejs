@@ -79,7 +79,7 @@
 			d.fy = null;
 		}
 
-		function ticked() {
+		function ticked(link, node) {
 			link
 				.attr("x1", function (d) { return d.source.x; })
 				.attr("y1", function (d) { return d.source.y; })
@@ -181,7 +181,7 @@
 							return d.id;
 						});
 
-					simulation.on("tick", ticked);
+					simulation.on("tick", function () { ticked(link, node); });
 					simulation.force("link").links(graph.links);
 				}
 			});
