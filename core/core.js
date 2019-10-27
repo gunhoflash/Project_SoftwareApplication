@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-exports.getTextArray = (url) => {
+exports.getText = url => {
 
 	// file not found
 	if (!fs.existsSync(url)) {
@@ -8,14 +8,25 @@ exports.getTextArray = (url) => {
 		return [];
 	}
 
-	// return text array
-	return fs.readFileSync(url, 'utf8').match(/[^\r\n]+/g);
+	// return text
+	return fs.readFileSync(url, 'utf8');
 };
 
-exports.getArray = (textArray, splitby) => {
+exports.getArray = text => {
+
+	let textArray;
 	let graphArray = [];
 	let cited = [];
 	let max_node_id = 0;
+	let splitby;
+
+	// TODO: type check
+	// handle exception: no text
+	if (!text) return null;
+
+	textArray = text.match(/[^\r\n]+/g);
+	splitby = textArray[0].match(/[^0-9]/);
+	console.log(`splitby: '${splitby}'`);
 
 	for (let i = 0; i < textArray.length; i++) {
 
@@ -31,7 +42,7 @@ exports.getArray = (textArray, splitby) => {
 	return graphArray;
 };
 
-exports.getNodeSizeNeighborArray = (array) => {
+exports.getNodeSizeNeighborArray = array => {
 	let nodeSizeNeighborArray = [];
 	for (let i = 0; i < array.length; i++) {
 		if (!nodeSizeNeighborArray[array[i][0]]) nodeSizeNeighborArray[array[i][0]] = [];
@@ -42,7 +53,7 @@ exports.getNodeSizeNeighborArray = (array) => {
 	return nodeSizeNeighborArray;
 };
 
-exports.getNodeSizeArray = (array) => {
+exports.getNodeSizeArray = array => {
 	let nodeSizeArray = [];
 	for (let i = 0; i < array.length; i++) {
 		if (!nodeSizeArray[array[i][0]]) nodeSizeArray[array[i][0]] = 0;
@@ -101,7 +112,7 @@ exports.getD3 = (graphArray, getNodeSizeNeighborArray) => {
 	return d3data;
 };
 
-exports.arrayMax = (array) => {
+exports.arrayMax = array => {
 	let max = 0;
 	for (let i = 0; i < array.length; i++) {
 		max = (max > array[i]) ? max : array[i];
@@ -123,7 +134,7 @@ getNumberOfOutersection = (array1, array2) => {
 
 exports.pageRank = (url, tolerance) => {
 	var pageRank_Array=[];
-	var file_array=this.getArray(this.getTextArray("./data/nodes1000.txt"),"	");
+	var file_array=this.getArray(this.getText("./data/nodes1000.txt"));
 	var num_of_neighbor=this.getNodeSizeArray(file_array);
 	var arr_of_neighbor=this.getNodeSizeNeighborArray(file_array);
 	var pageRank_table=[];
