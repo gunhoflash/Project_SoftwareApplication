@@ -81,16 +81,19 @@ exports.getD3 = (graphArray, getNodeSizeNeighborArray) => {
 	for (let i = 0; i < graphArray.length; i++) {
 		source = graphArray[i][0];
 		target = graphArray[i][1];
-		node_value_source = (getNodeSizeNeighborArray[source] ? getNodeSizeNeighborArray[source].length : 0);
-		node_value_target = (getNodeSizeNeighborArray[target] ? getNodeSizeNeighborArray[target].length : 0);
+
+		node_value_source   = getNodeSizeNeighborArray[source]          ? getNodeSizeNeighborArray[source].length : 0;
+		node_value_target   = getNodeSizeNeighborArray[target]          ? getNodeSizeNeighborArray[target].length : 0;
+
 		intersect = getNumberOfIntersection(getNodeSizeNeighborArray[source], getNodeSizeNeighborArray[target]);
 		outersect = getNumberOfOutersection(getNodeSizeNeighborArray[source], getNodeSizeNeighborArray[target]) - 2;
-		intersect_ratio = (outersect > 0) ? intersect / outersect : 0;
-		max_intersect_ratio = (max_intersect_ratio < intersect_ratio) ? intersect_ratio : max_intersect_ratio;
 
-		d3data.maxLinkValue = (d3data.maxLinkValue > intersect) ? d3data.maxLinkValue : intersect;
-		d3data.maxNodeSize = (d3data.maxNodeSize > node_value_source) ? d3data.maxNodeSize : node_value_source;
-		d3data.maxNodeSize = (d3data.maxNodeSize > node_value_target) ? d3data.maxNodeSize : node_value_target;
+		intersect_ratio     = (outersect           > 0                ) ? intersect / outersect                   : 0;
+		max_intersect_ratio = (max_intersect_ratio < intersect_ratio  ) ? intersect_ratio                         : max_intersect_ratio;
+
+		d3data.maxLinkValue = (d3data.maxLinkValue > intersect        ) ? d3data.maxLinkValue                     : intersect;
+		d3data.maxNodeSize  = (d3data.maxNodeSize  > node_value_source) ? d3data.maxNodeSize                      : node_value_source;
+		d3data.maxNodeSize  = (d3data.maxNodeSize  > node_value_target) ? d3data.maxNodeSize                      : node_value_target;
 
 		if (!cited[source])
 		{
