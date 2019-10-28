@@ -132,45 +132,53 @@ getNumberOfOutersection = (array1, array2) => {
 	return [...new Set([...array1, ...array2])].length;
 };
 
-exports.pageRank = (url, tolerance) => {
-	var pageRank_Array=[];
-	var file_array=this.getArray(this.getText("./data/nodes1000.txt"));
-	var num_of_neighbor=this.getNodeSizeArray(file_array);
-	var arr_of_neighbor=this.getNodeSizeNeighborArray(file_array);
+exports.pageRank = (text, tolerance) => {
+	var file_array=this.getArray(text);//입력받은 text를 array형태로 변환
+	var num_of_neighbor=this.getNodeSizeArray(file_array);//각 노드의 이웃 수를 배열형태로 저장
+	var arr_of_neighbor=this.getNodeSizeNeighborArray(file_array);//각 노드의 이웃을 나열한 배열을 배열형태로 저장(즉, 2차원배열)
 	var pageRank_table=[];
-	var length=num_of_neighbor.length;
-	for(var i=1; i<length+1; i++)
+	var length=num_of_neighbor.length;//나중에 자주쓰게될 배열길이 length 생성
+	for(var i=0; i<length; i++)
 	{
-		pageRank_table.push([i,num_of_neighbor[i],arr_of_neighbor[i]]);
+		pageRank_table.push([i,num_of_neighbor[i],arr_of_neighbor[i]]);//data가 많을경우를 대비하여 sparse matrix encoding을 진행
 	}
 	//console.log(pageRank_table);
-	
-	var beta=0.85;
-	var j=0;
-	var old_R=Array.apply(null,new Array(length)).map(Number.prototype.valueOf,1/length);
-	var new_R=Array.apply(null,new Array(length)).map(Number.prototype.valueOf,0);
 	//console.log(old_R);
 	//console.log(new_R);
-	var err=this.getError(old_R,new_R);
-	while(err>tolerance)
+	var rank_sum=0;	//모든 노드의 pagerank sum을 저장할 변수
+	var beta=0.85; // beta값 지정
+	var j=0; //반복에 쓰일 변수
+	var old_R=Array.apply(null,new Array(length)).map(Number.prototype.valueOf,1/length);//old_R초기화	
+	var new_R;
+	do
 	{
-		new_R=Array.apply(null,new Array(length)).map(Number.prototype.valueOf,(1-beta)/length);
+		new_R=Array.apply(null,new Array(length)).map(Number.prototype.valueOf,(1-beta)/length);//new_R초기화
+		rank_sum=0;
 		for(i=0; i<length; i++)
 		{
 			for(j=0; j<pageRank_table[i][1]; j++)
 			{
-				new_R[pageRank_table[i][2][j]]+=(beta*old_R[i])/pageRank_table[i][1];
+				//console.log(i+","+j);
+				new_R[pageRank_table[i][2][j]]+=(beta*old_R[i])/pageRank_table[i][1];//pageRank 계산
 			}
 		}
+		
+		for(i=0; i<length; i++)
+		{
+			rank_sum+=new_R[i];//new_R의 rank_sum확인용
+		}
+		console.log("rank_sum : "+rank_sum);
 		//console.clear();
 		//console.log(new_R);
 		err=this.getError(old_R,new_R);
 		old_R=new_R;
 	}
-	console.log(err);
-	console.log("out of loop");
+	while(err>tolerance);
+	console.log("err : "+err);//err가 tolerance를 만족하는지 확인용
+	//console.log("out of loop");
+	//console.log(old_R);
 	console.log(old_R);
-	return pageRank_Array;
+	return old_R;//pageRank가 저장된 vector를 반납
 };
 
 exports.getError = (arr1,arr2) => {
