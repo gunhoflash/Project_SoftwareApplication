@@ -92,99 +92,94 @@
 		}
 
 		// load analyzed data from server and visualize
-		function loadData() {
-			$.ajax({
-				method: 'GET',
-				url: '/data',
-				success: function (data) {
+		function visualize(data) {
 
-					graph = data.d3data;
-					console.log(graph);
+			console.log(data);
+
+			graph = data.d3data;
+			
+			// handle exception: no graph
+			if (graph == null) return;
+
+			// clear previous graph
+			svg.selectAll("*").remove();
+
+			// set d3
+			simulation = d3.forceSimulation(graph.nodes)
+			.force("link", d3.forceLink().id(function (d) {
+				return d.id;
+			}))
+			.force("charge", d3.forceManyBody())
+			.force("center", d3.forceCenter(width / 2, height / 2));
+
+			// set opacity
+			var opacity = 2 / (2 + Math.sqrt(data.numberOfEdges) / 32);
+			console.log("opacity:" + opacity);
+			
+			// append links
+			var link = svg.append("g")
+				.attr("class", "links")
+				.selectAll("line")
+				.data(graph.links)
+				.enter().append("line")
+				.attr("stroke-opacity", function (d) {
+					return d.intersect_ratio * 0.85 + 0.15;
+				})
+				.attr("display", function (d) {
+					/*if (d.intersect_ratio > 0.0000001 && d.intersect_ratio < 0.4) return "none";
+					else*/ return "";
+				})
+				.attr("stroke-width", function (d) {
+					return Math.sqrt(d.intersect) + 1;
+				})
+				.attr("stroke", function (d) {
+					var rank = 1 - d.intersect_ratio;
+					var r = Math.sqrt(1 - rank) * 255;
+					//var g = (rank >= 0.25 && rank < 0.5) ? (rank - 0.25) * 4 * 255
+					//		: ((rank >= 0.5 && rank <= 0.75) ? (0.75 - rank) * 4 * 255 : 0);
+					var g = (rank < 0.2) ? 0 : ((rank < 0.6) ? rank / 0.6 * 240 : Math.sqrt((1 - rank) / 0.4) * 240);
+					var b = (rank > 0.5) ? (rank - 0.5) / 0.5 * 255 : 0;
 					
-					// handle exception: no graph
-					if (graph == null) return;
+					return "rgb(" + Math.floor(r) + "," + Math.floor(g) +","+ Math.floor(b) + ")";
+				});
 
-					// clear previous graph
-					svg.selectAll("*").remove();
+			// append nodes
+			var node = svg.append("g")
+				.attr("class", "nodes")
+				.selectAll("circle")
+				.data(graph.nodes)
+				.enter().append("circle")
+				.attr("r", function(d) { return d.size / graph.maxNodeSize * 8 + 0.5; })//  return Math.log(d.size + 1) + 0.5; })
+				.attr("fill", () => "#aa0000")
+				.call(d3.drag()
+					.on("start", dragstarted)
+					.on("drag", dragged)
+					.on("end", dragended)
+				);
 
-					// set d3
-					simulation = d3.forceSimulation(graph.nodes)
-					.force("link", d3.forceLink().id(function (d) {
-						return d.id;
-					}))
-					.force("charge", d3.forceManyBody())
-					.force("center", d3.forceCenter(width / 2, height / 2));
+			// set zoom in/out
+			svg.call(d3.zoom()
+				//.extent([[0, 0], [width, height]])
+				.scaleExtent([64/(64+Math.sqrt(data.numberOfNodes)), 8])
+				.on("zoom", function () {
+					svg.selectAll("g").attr("transform", d3.event.transform);
+				}));
 
-					// set opacity
-					var opacity = 2 / (2 + Math.sqrt(graph.links.length) / 32);
-					console.log("opacity:" + opacity);
-					
-					// append links
-					var link = svg.append("g")
-						.attr("class", "links")
-						.selectAll("line")
-						.data(graph.links)
-						.enter().append("line")
-						.attr("stroke-opacity", function (d) {
-							return d.intersect_ratio * 0.85 + 0.15;
-						})
-						.attr("display", function (d) {
-							if (d.intersect_ratio > 0.0000001 && d.intersect_ratio < 0.4) return "none";
-							else return "";
-						})
-						.attr("stroke-width", function (d) {
-							return Math.sqrt(d.intersect) + 1;
-						})
-						.attr("stroke", function (d) {
-							var rank = 1 - d.intersect_ratio;
-							var r = Math.sqrt(1 - rank) * 255;
-							//var g = (rank >= 0.25 && rank < 0.5) ? (rank - 0.25) * 4 * 255
-							//		: ((rank >= 0.5 && rank <= 0.75) ? (0.75 - rank) * 4 * 255 : 0);
-							var g = (rank < 0.2) ? 0 : ((rank < 0.6) ? rank / 0.6 * 240 : Math.sqrt((1 - rank) / 0.4) * 240);
-							var b = (rank > 0.5) ? (rank - 0.5) / 0.5 * 255 : 0;
-							
-							return "rgb(" + Math.floor(r) + "," + Math.floor(g) +","+ Math.floor(b) + ")";
-						});
+			/*var lables = node.append("text")
+				.text(function (d) {
+					return d.id;
+				})
+				.attr('x', 6)
+				.attr('y', 3);*/
 
-					// append nodes
-					var node = svg.append("g")
-						.attr("class", "nodes")
-						.selectAll("circle")
-						.data(graph.nodes)
-						.enter().append("circle")
-						.attr("r", function(d) { return Math.pow(d.size / 32, 2) + 0.2; })//  return Math.log(d.size + 1) + 0.5; })
-						.attr("fill", () => "#aa0000")
-						.call(d3.drag()
-							.on("start", dragstarted)
-							.on("drag", dragged)
-							.on("end", dragended)
-						);
+			// set title of each node
+			node.append("title")
+				.text(function (d) {
+					return d.id;
+				});
 
-					// set zoom in/out
-					svg.call(d3.zoom()
-						//.extent([[0, 0], [width, height]])
-						.scaleExtent([0.001, 100])
-						.on("zoom", function () {
-							svg.selectAll("g").attr("transform", d3.event.transform);
-						}));
-
-					/*var lables = node.append("text")
-						.text(function (d) {
-							return d.id;
-						})
-						.attr('x', 6)
-						.attr('y', 3);*/
-
-					// set title of each node
-					node.append("title")
-						.text(function (d) {
-							return d.id;
-						});
-
-					simulation.on("tick", function () { ticked(link, node); });
-					simulation.force("link").links(graph.links);
-				}
-			});
+			simulation.on("tick", function () { ticked(link, node); });
+			simulation.force("link").links(graph.links);
 		}
 
 		// submit user data to server to analyze
@@ -199,7 +194,7 @@
 				data: formData,
 				contentType: false,
 				processData: false,
-				success: loadData,
+				success: visualize,
 				error: console.log
 			});
 		}
