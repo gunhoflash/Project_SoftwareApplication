@@ -14,29 +14,21 @@ exports.getText = url => {
 
 exports.getArray = text => {
 
-	let textArray;
+	let raw_textArray;
 	let graphArray = [];
-	let cited = [];
-	let max_node_id = 0;
-	let splitby;
 
 	// TODO: type check
 	// handle exception: no text
 	if (!text) return null;
 
-	textArray = text.match(/[^\r\n]+/g);
-	splitby = textArray[0].match(/[^0-9]/);
-	console.log(`splitby: '${splitby}'`);
-
-	for (let i = 0; i < textArray.length; i++) {
-
-		graphArray[i] = textArray[i].split(splitby).map(Number);
-
-		if (!cited[graphArray[i][0]]) cited[graphArray[i][0]] = 1;
-		if (!cited[graphArray[i][1]]) cited[graphArray[i][1]] = 1;
-
-		if (max_node_id < graphArray[i][0]) max_node_id = graphArray[i][0];
-		if (max_node_id < graphArray[i][1]) max_node_id = graphArray[i][1];
+	// split line
+	raw_textArray = text.match(/[^\r\n]+/g);
+	
+	// pop only validate lines
+	for (let i = 0, n; i < raw_textArray.length; i++) {
+		n = raw_textArray[i].match(/[0-9]+/g);
+		if (!n || n.length < 2) continue;
+		graphArray.push([Number(n[0]), Number(n[1])]);
 	}
 
 	return graphArray;
