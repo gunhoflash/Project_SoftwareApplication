@@ -185,7 +185,95 @@ exports.getError = (arr1,arr2) => {
 	return error;
 }
 
-exports.HITS = (url) => {
-	var HITS_Array=[];
-	return HITS_Array;
+exports.HITS = (text,tolerance) => {
+	var file_array=this.getArray(text);//입력받은 text를 array형태로 변환
+	var num_of_neighbor=this.getNodeSizeArray(file_array);//각 노드의 이웃 수를 배열형태로 저장
+	var arr_of_neighbor=this.getNodeSizeNeighborArray(file_array);//각 노드의 이웃을 나열한 배열을 배열형태로 저장(즉, 2차원배열)
+	var length=num_of_neighbor.length;
+	var old_authorities=Array.apply(null,new Array(length)).map(Number.prototype.valueOf,1/Math.sqrt(length));
+	var new_authorities;
+	var old_hubs=Array.apply(null,new Array(length)).map(Number.prototype.valueOf,1/Math.sqrt(length));
+	var new_hubs;
+	var normalizing_constant;
+	var converged=false;
+	var counter;
+	var sum1;
+	var sum2;
+	do
+	{		
+		//new_authorities를 계산
+		normalizing_constant=0;
+		sum1=0;		
+		new_authorities=Array.apply(null,new Array(length)).map(Number.prototype.valueOf,0);
+		for(var i=0; i<length; i++)
+		{
+			for(var j=0; j<num_of_neighbor[i]; j++)
+			{
+				new_authorities[i]+=old_hubs[arr_of_neighbor[i][j]];//update authorities
+			}	
+			normalizing_constant+=Math.pow(new_authorities[i],2);
+		}
+		normalizing_constant=1/Math.sqrt(normalizing_constant);
+		for(i=0; i<length; i++)
+		{
+			new_authorities[i]*=normalizing_constant;
+			//sum1+=Math.pow(new_authorities[i],2);
+		}
+
+		//new_hubs를 계산
+		normalizing_constant=0;
+		sum2=0;
+		new_hubs=Array.apply(null,new Array(length)).map(Number.prototype.valueOf,0);
+		for(i=0; i<length; i++)
+		{
+			for(j=0; j<num_of_neighbor[i]; j++)
+			{
+				new_hubs[i]+=old_authorities[arr_of_neighbor[i][j]];//update hubs
+			}	
+			normalizing_constant+=Math.pow(new_hubs[i],2);
+		}
+		normalizing_constant=1/Math.sqrt(normalizing_constant);
+		for(i=0; i<length; i++)
+		{
+			new_hubs[i]*=normalizing_constant;
+			//sum2+=Math.pow(new_hubs[i],2);
+		}
+
+		//converged되었는지 확인
+		counter=0;
+		for(i=0; i<length; i++)
+		{
+			if(Math.abs(old_authorities[i]-new_authorities[i])<tolerance&&Math.abs(old_hubs[i]-new_hubs[i])<tolerance)
+			{
+				counter++;
+			}
+		}
+		console.log(counter);
+		if(counter==length)
+		{
+			converged=true;
+		}
+		else
+		{
+			old_authorities=new_authorities;
+			old_hubs=new_hubs;
+		}
+	}
+	while(converged==false);
+	/*
+	console.log("out_of_while");
+	console.log("old_hubs");
+	console.log(old_hubs);
+	console.log("new_hubs");
+	console.log(new_hubs);
+	console.log("old_authorities");
+	console.log(old_authorities);
+	console.log("new_authorities");
+	console.log(new_authorities);
+	console.log("sum1 : "+sum1+", sum2 :"+sum2);
+	*/
+	var HITS_Array={}
+	HITS_Array['hubs']=old_hubs;
+	HITS_Array['authorities']=old_authorities;
+	return HITS_Array;//hubs와 authorities성분을가지는 dictionary를 반환
 };

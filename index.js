@@ -48,7 +48,8 @@ analysis = text =>
 		console.log(`analysis`);
 		
 		//우빈 중간결과 확인용
-		var pageRank_Array = core.pageRank(text, 0.0001);
+		//var pageRank_Array = core.pageRank(text, 0.0001);
+		//var HITS_Array=core.HITS(text, 0.0001);
 
 		let result = {};
 		result.graphArray            = core.getArray(text);
