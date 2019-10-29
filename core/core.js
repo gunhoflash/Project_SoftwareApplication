@@ -53,6 +53,9 @@ exports.getNodeSizeArray = array => {
 		nodeSizeArray[array[i][0]]++;
 		nodeSizeArray[array[i][1]]++;
 	}
+
+	// TODO: handle undefined elements
+	
 	return nodeSizeArray;
 };
 

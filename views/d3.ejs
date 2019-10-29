@@ -47,7 +47,7 @@
 
 <body>
 	<div id="floatbox">
-		<h1>Hello, world!</h1>
+		<h1>Graphoto</h1>
 		<textarea id="input_text" rows="3" placeholder="type here"></textarea>
 		<p>or</p>
 		<input type="file" name="file" id="input_file">
@@ -92,9 +92,17 @@
 		}
 
 		// load analyzed data from server and visualize
-		function visualize(data) {
+		function visualize(result) {
 
+			var data = result.result;
+
+			// handle exception: no result
+			if (data == null) return;
+
+			// log data to test
 			console.log(data);
+			console.log(data.density);
+			console.log(data.HITS_Array.hubs);
 
 			graph = data.d3data;
 			

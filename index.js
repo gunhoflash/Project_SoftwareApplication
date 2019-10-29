@@ -26,19 +26,12 @@ app.post('/upload', upload.single('input_file'), (req, res) => {
 	analysis(text)
 	.then(result => {
 		res.json({
-			graphArray:    result.graphArray,
-			d3data:        result.d3data,
-			numberOfNodes: result.nodeSizeArray.length,
-			numberOfEdges: result.graphArray.length
-			// TODO: count the number of networks
+			result: result
 		});
 	}, err => {
 		console.log(err);
 		res.json({
-			graphArray: null,
-			d3data:     null,
-			numberOfNodes: null,
-			numberOfEdges: null
+			result: null
 		});
 	});
 });
@@ -49,14 +42,22 @@ analysis = text =>
 		
 		//우빈 중간결과 확인용
 		//var pageRank_Array = core.pageRank(text, 0.0001);
-		//var HITS_Array=core.HITS(text, 0.0001);
+		var HITS_Array=core.HITS(text, 0.0001);
 
 		let result = {};
+
 		result.graphArray            = core.getArray(text);
 		result.nodeSizeNeighborArray = core.getNodeSizeNeighborArray(result.graphArray);
 		result.nodeSizeArray         = core.getNodeSizeArray(result.graphArray);
 		result.d3data                = core.getD3(result.graphArray, result.nodeSizeNeighborArray);
-
+		
+		result.numberOfNodes         = result.nodeSizeArray.length;
+		result.numberOfEdges         = result.graphArray.length;
+		result.density               = result.numberOfEdges / result.numberOfNodes / (result.numberOfNodes - 1) * 2;
+		result.HITS_Array            = HITS_Array;
+		
+		// TODO: count the number of networks
+		
 		resolve(result);
 	});
 
