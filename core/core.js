@@ -1,5 +1,22 @@
 const fs = require('fs');
 
+// delete all files in the folder
+exports.clearFolder = path => {
+	fs.readdirSync(path)
+	.forEach((file, index) => {
+		exports.deleteFile(path + '/' + file);
+	});
+};
+
+// delete a file
+exports.deleteFile = url => {
+	fs.unlink(url, err => {
+		if (err)
+			console.log(err);
+	});
+};
+
+// read the file and return as text
 exports.getText = url => {
 
 	// file not found

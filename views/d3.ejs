@@ -101,8 +101,6 @@
 
 			// log data to test
 			console.log(data);
-			console.log(data.density);
-			console.log(data.HITS_Array.hubs);
 
 			graph = data.d3data;
 			
@@ -168,7 +166,7 @@
 			// set zoom in/out
 			svg.call(d3.zoom()
 				//.extent([[0, 0], [width, height]])
-				.scaleExtent([128/(128 + Math.sqrt(data.numberOfNodes + data.numberOfEdges)), 8])
+				.scaleExtent([1/(128 + Math.sqrt(data.numberOfNodes + data.numberOfEdges)), 8])
 				.on("zoom", function () {
 					svg.selectAll("g").attr("transform", d3.event.transform);
 				}));

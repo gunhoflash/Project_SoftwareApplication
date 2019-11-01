@@ -33,33 +33,41 @@ app.post('/upload', upload.single('input_file'), (req, res) => {
 		res.json({
 			result: null
 		});
+	})
+	.then(() => {
+		console.log(`remove file: ${req.file.path}`);
+		core.deleteFile(req.file.path);
 	});
 });
 
 analysis = text =>
 	new Promise((resolve, reject) => {
-		console.log(`analysis`);
+		console.log(`start analysis`);		
 		
-		//우빈 중간결과 확인용
-		//var pageRank_Array = core.pageRank(text, 0.0001);
-		var HITS_Array=core.HITS(text, 0.0001);
-
 		let result = {};
 
 		result.graphArray            = core.getArray(text);
 		result.nodeSizeNeighborArray = core.getNodeSizeNeighborArray(result.graphArray);
 		result.nodeSizeArray         = core.getNodeSizeArray(result.graphArray);
 		result.d3data                = core.getD3(result.graphArray, result.nodeSizeNeighborArray);
-		
+
 		result.numberOfNodes         = result.nodeSizeArray.length;
 		result.numberOfEdges         = result.graphArray.length;
 		result.density               = result.numberOfEdges / result.numberOfNodes / (result.numberOfNodes - 1) * 2;
-		result.HITS_Array            = HITS_Array;
+
+		//우빈 중간결과 확인용
+		result.pageRank_Array        = core.pageRank(text, 0.0001);
+		result.HITS_Array            = core.HITS(text, 0.0001);
 		
 		// TODO: count the number of networks
-		
+
+		console.log(`end analysis`);
 		resolve(result);
 	});
 
+// delete all files in the upload folder
+core.clearFolder('uploads');
+
+// start server
 server.listen(3344);
 console.log(`server listen 127.0.0.1:3344`);
