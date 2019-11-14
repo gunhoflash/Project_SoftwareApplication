@@ -40,6 +40,8 @@
 		}
 
 	</style>
+
+	<link rel="stylesheet" href="/scss.css">
 	
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 	<script src="https://d3js.org/d3.v4.min.js"></script>
@@ -51,35 +53,78 @@
 		<textarea id="input_text" rows="3" placeholder="type here"></textarea>
 		<p>or</p>
 		<input type="file" name="file" id="input_file">
-		<button id="sumbit" type="button">Submit</button>
+		<button id="button_sumbit" type="button">Submit</button>
+		<input type="number" name="fps" id="input_fps">
+		<button id="button_fps" type="button">Set FPS</button>
+	</div>
+
+	<div id="cat" class="box">
+		<div class="cat">
+			<div class="cat__body"></div>
+			<div class="cat__body"></div>
+			<div class="cat__tail"></div>
+			<div class="cat__head"></div>
+		</div>
 	</div>
 
 	<svg></svg>
 	
 	<script>
-		var width  = 1280;
-		var height = 720;
-		var svg    = d3.select("svg");
-		var simulation;
+		var fps          = 30;
+		var frame        = 0;
+		var frameTick    = 0;
+		var tickEnable   = false;
 
+		var timeInterval = null;
+		var timeOut      = null;
+		var width        = 1280;
+		var height       = 720;
+		var svg          = d3.select("svg");
+		var simulation;
+		var link, node;
+
+		var big_score;
+
+		/*
+		
+		drag
+		
+		*/
 		function dragstarted(d) {
 			if (!d3.event.active) simulation.alphaTarget(0.3).restart();
 			d.fx = d.x;
 			d.fy = d.y;
 		}
-
 		function dragged(d) {
 			d.fx = d3.event.x;
 			d.fy = d3.event.y;
 		}
-
 		function dragended(d) {
 			if (!d3.event.active) simulation.alphaTarget(0);
 			d.fx = null;
 			d.fy = null;
 		}
 
-		function ticked(link, node) {
+		// set fps
+		function set_fps(_fps) {
+			console.log('set fps: ' + _fps);
+			// validate fps
+			fps = _fps;
+			if (fps <   1) fps =   1;
+			if (fps > 144) fps = 144;
+
+			// set interval
+			if (timeInterval) clearInterval(timeInterval);
+			timeInterval = setInterval(function () {
+				if (++frame > fps) frame = frameTick = 0;
+				tick();
+			}, 1000 / fps);
+		}
+
+		function tick() {
+			if (!tickEnable) return;
+			if (frameTick > frame) return;
+			frameTick++;
 			link
 				.attr("x1", function (d) { return d.source.x; })
 				.attr("y1", function (d) { return d.source.y; })
@@ -107,6 +152,8 @@
 			// handle exception: no graph
 			if (graph == null) return;
 
+			big_score = Math.sqrt(data.numberOfNodes + data.numberOfEdges);
+
 			// clear previous graph
 			svg.selectAll("*").remove();
 
@@ -123,7 +170,7 @@
 			console.log("opacity:" + opacity);
 			
 			// append links
-			var link = svg.append("g")
+			link = svg.append("g")
 				.attr("class", "links")
 				.selectAll("line")
 				.data(graph.links)
@@ -150,7 +197,7 @@
 				});
 
 			// append nodes
-			var node = svg.append("g")
+			node = svg.append("g")
 				.attr("class", "nodes")
 				.selectAll("circle")
 				.data(graph.nodes)
@@ -165,11 +212,11 @@
 
 			// set zoom in/out
 			svg.call(d3.zoom()
-				//.extent([[0, 0], [width, height]])
-				.scaleExtent([1/(128 + Math.sqrt(data.numberOfNodes + data.numberOfEdges)), 8])
+				.scaleExtent([1/(128 + big_score), 8])
 				.on("zoom", function () {
 					svg.selectAll("g").attr("transform", d3.event.transform);
-				}));
+				})
+			);
 
 			/*var lables = node.append("text")
 				.text(function (d) {
@@ -184,12 +231,30 @@
 					return d.id;
 				});
 
-			simulation.on("tick", function () { ticked(link, node); });
+			set_fps(fps);
+
+			tickEnable = false;
+			if (timeOut) clearTimeout(timeOut);
+			timeOut = setTimeout(function () {
+				console.log('tick enabled');
+				display_cat(false);
+				tickEnable = true;
+				timeOut = null;
+			}, 100 + big_score * 50);
+
+			simulation.on("tick", tick);
 			simulation.force("link").links(graph.links);
 		}
 
-		// submit user data to server to analyze
+		// show, hide cat
+		function display_cat(bool) {
+			$('#cat').css('display', bool ? '' : 'none');
+		}
+
+		// submit user data to server
 		function submit() {
+			display_cat(true);
+
 			var formData = new FormData();
 				formData.append("input_text", $("#input_text").val());
 				formData.append("input_file", $("#input_file")[0].files[0]);
@@ -208,7 +273,8 @@
 		// initialize
 		$(document).ready(function () {
 			$('#input_text').val('0	1\n1	2\n2	3\n2	4\n2	5\n3	4\n3	7\n4	5\n4	6\n4	7\n5	7\n6	8');
-			$('#sumbit').click(submit);
+			$('#button_sumbit').click(submit);
+			$('#button_fps').click(function () { set_fps(parseInt($("#input_fps").val())); });
 			submit();
 		})
 	</script>
