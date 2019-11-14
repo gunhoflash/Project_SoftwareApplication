@@ -19,30 +19,30 @@ app.get('/', (req, res) => {
 // get uploaded file or text and return analyzed data
 app.post('/upload', upload.single('input_file'), (req, res) => {
 
-	let text = null;
-	     if (req.file && req.file.path) text = core.getText(req.file.path);
-	else if (req.body.input_text)       text = req.body.input_text;
+	let text = req.body.input_text;
+	let path = req.file ? req.file.path : null;
+	if (path) text = core.getText(path);
 
+	// analyze text
 	analysis(text)
 	.then(result => {
-		res.json({
-			result: result
-		});
+		res.json({ result: result });
 	}, err => {
 		console.log(err);
-		res.json({
-			result: null
-		});
+		res.json({ result: null });
 	})
 	.then(() => {
-		console.log(`remove file: ${req.file.path}`);
-		core.deleteFile(req.file.path);
+		// delete uploaded file
+		if (!path) return;
+		console.log(`remove file: ${path}`);
+		core.deleteFile(path);
 	});
 });
 
 analysis = text =>
 	new Promise((resolve, reject) => {
-		console.log(`start analysis`);		
+		console.log(`start analysis`);
+		if (!text) return reject(`invalid input to analyze`);
 		
 		let result = {};
 
