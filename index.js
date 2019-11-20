@@ -2,6 +2,7 @@ const express = require('express');
 const multer  = require('multer');
 const upload  = multer({ dest: 'uploads/' });
 const core    = require('./core/core');
+const modularity = require('./core/modularity');
 const app     = express();
 
 var server = require('http').createServer(app);
@@ -54,6 +55,8 @@ analysis = text =>
 		result.numberOfNodes         = result.nodeSizeArray.length;
 		result.numberOfEdges         = result.graphArray.length;
 		result.density               = result.numberOfEdges / result.numberOfNodes / (result.numberOfNodes - 1) * 2;
+
+		result.modularity_edge       = modularity.getModularityByEdgeCommunities([result.graphArray]);
 
 		//우빈 중간결과 확인용
 		result.pageRank_Array        = core.pageRank(text, 0.0001);
