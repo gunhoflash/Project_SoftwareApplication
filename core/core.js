@@ -29,50 +29,69 @@ exports.getText = url => {
 	return fs.readFileSync(url, 'utf8');
 };
 
-exports.getArray = text => {
+exports.parseTextGraph = text => {
 
-	let raw_textArray;
-	let graphArray = [];
+	let i, textLine, node1, node2, nodeLast = -1;
+	let textLines;
+	let nodes = [];
+	let edges = [];
 
 	// TODO: type check
 	// handle exception: no text
 	if (!text) return null;
 
 	// split line
-	raw_textArray = text.match(/[^\r\n]+/g);
+	textLines = text.match(/[^\r\n]+/g);
 	
 	// pop only validate lines
-	for (let i = 0, n; i < raw_textArray.length; i++) {
-		n = raw_textArray[i].match(/[0-9]+/g);
-		if (!n || n.length < 2) continue;
-		graphArray.push([Number(n[0]), Number(n[1])]);
+	for (i = 0; i < textLines.length; i++) {
+		textLine = textLines[i].match(/[0-9]+/g);
+		if (!textLine || textLine.length < 2) continue;
+		node1 = Number(textLine[0]);
+		node2 = Number(textLine[1]);
+		nodeLast = Math.max(nodeLast, node1, node2);
+		edges.push([node1, node2]);
 	}
 
-	return graphArray;
+	// nodes: [0, 1, 2, ..., max]
+	nodes = [...Array(nodeLast + 1).keys()];
+
+	return {
+		nodes: nodes,
+		edges: edges
+	};
 };
 
-exports.getNodeSizeNeighborArray = array => {
-	let nodeSizeNeighborArray = [];
-	for (let i = 0; i < array.length; i++) {
-		if (!nodeSizeNeighborArray[array[i][0]]) nodeSizeNeighborArray[array[i][0]] = [];
-		if (!nodeSizeNeighborArray[array[i][1]]) nodeSizeNeighborArray[array[i][1]] = [];
-		nodeSizeNeighborArray[array[i][0]].push(array[i][1]);
-		nodeSizeNeighborArray[array[i][1]].push(array[i][0]);
+exports.getNodeSizeNeighborArray = edges => {
+	let i, node1, node2, nodeSizeNeighborArray = [];
+	for (i = 0; i < edges.length; i++) {
+		node1 = edges[i][0];
+		node2 = edges[i][1];
+		if (!nodeSizeNeighborArray[node1]) nodeSizeNeighborArray[node1] = [];
+		if (!nodeSizeNeighborArray[node2]) nodeSizeNeighborArray[node2] = [];
+		nodeSizeNeighborArray[node1].push(node2);
+		nodeSizeNeighborArray[node2].push(node1);
 	}
 	return nodeSizeNeighborArray;
 };
 
-exports.getNodeSizeArray = array => {
-	let nodeSizeArray = [];
-	for (let i = 0; i < array.length; i++) {
-		if (!nodeSizeArray[array[i][0]]) nodeSizeArray[array[i][0]] = 0;
-		if (!nodeSizeArray[array[i][1]]) nodeSizeArray[array[i][1]] = 0;
-		nodeSizeArray[array[i][0]]++;
-		nodeSizeArray[array[i][1]]++;
+exports.getNodeSizeArray = edges => {
+	let i, node1, node2, nodeSizeArray = [];
+	for (i = 0; i < edges.length; i++) {
+		node1 = edges[i][0];
+		node2 = edges[i][1];
+		if (!nodeSizeArray[node1]) nodeSizeArray[node1] = 0;
+		if (!nodeSizeArray[node2]) nodeSizeArray[node2] = 0;
+		nodeSizeArray[node1]++;
+		nodeSizeArray[node2]++;
 	}
 
-	// TODO: handle undefined elements
-	
+	// handle undefined elements: for independent nodes
+	for (i = 0; i < nodeSizeArray.length; i++) {
+		if (nodeSizeArray[i] == undefined)
+			nodeSizeArray[i] = 0;
+	}
+
 	return nodeSizeArray;
 };
 
@@ -80,7 +99,7 @@ exports.getLinkValueArray = () => {
 
 };
 
-exports.getD3 = (graphArray, getNodeSizeNeighborArray) => {
+exports.getD3 = (edges, getNodeSizeNeighborArray) => {
 	let source, target, node_value_source, node_value_target, intersect, outersect, intersect_ratio, max_intersect_ratio = 0;
 	let cited = [];
 	let d3data = {
@@ -90,9 +109,9 @@ exports.getD3 = (graphArray, getNodeSizeNeighborArray) => {
 		"maxNodeSize": 0
 	};
 
-	for (let i = 0; i < graphArray.length; i++) {
-		source = graphArray[i][0];
-		target = graphArray[i][1];
+	for (let i = 0; i < edges.length; i++) {
+		source = edges[i][0];
+		target = edges[i][1];
 
 		node_value_source   = getNodeSizeNeighborArray[source]          ? getNodeSizeNeighborArray[source].length : 0;
 		node_value_target   = getNodeSizeNeighborArray[target]          ? getNodeSizeNeighborArray[target].length : 0;
@@ -148,7 +167,7 @@ getNumberOfOutersection = (array1, array2) => {
 };
 
 exports.pageRank = (text, tolerance) => {
-	var file_array=this.getArray(text);//입력받은 text를 array형태로 변환
+	var file_array=this.parseTextGraph(text).edges;//입력받은 text를 array형태로 변환
 	var num_of_neighbor=this.getNodeSizeArray(file_array);//각 노드의 이웃 수를 배열형태로 저장
 	var arr_of_neighbor=this.getNodeSizeNeighborArray(file_array);//각 노드의 이웃을 나열한 배열을 배열형태로 저장(즉, 2차원배열)
 	var pageRank_table=[];
@@ -206,7 +225,7 @@ exports.getError = (arr1,arr2) => {
 }
 
 exports.HITS = (text,tolerance) => {
-	var file_array=this.getArray(text);//입력받은 text를 array형태로 변환
+	var file_array=this.parseTextGraph(text).edges;//입력받은 text를 array형태로 변환
 	var num_of_neighbor=this.getNodeSizeArray(file_array);//각 노드의 이웃 수를 배열형태로 저장
 	var arr_of_neighbor=this.getNodeSizeNeighborArray(file_array);//각 노드의 이웃을 나열한 배열을 배열형태로 저장(즉, 2차원배열)
 	var length=num_of_neighbor.length;

@@ -45,18 +45,19 @@ analysis = text =>
 		console.log(`start analysis`);
 		if (!text) return reject(`invalid input to analyze`);
 		
-		let result = {};
+		let result = core.parseTextGraph(text); // nodes and edges are in here
 
-		result.graphArray            = core.getArray(text);
-		result.nodeSizeNeighborArray = core.getNodeSizeNeighborArray(result.graphArray);
-		result.nodeSizeArray         = core.getNodeSizeArray(result.graphArray);
-		result.d3data                = core.getD3(result.graphArray, result.nodeSizeNeighborArray);
+		result.numberOfNodes         = result.nodes.length;
+		result.numberOfEdges         = result.edges.length;
 
-		result.numberOfNodes         = result.nodeSizeArray.length;
-		result.numberOfEdges         = result.graphArray.length;
-		result.density               = result.numberOfEdges / result.numberOfNodes / (result.numberOfNodes - 1) * 2;
+		result.nodeSizeNeighborArray = core.getNodeSizeNeighborArray(result.edges);
+		result.nodeSizeArray         = core.getNodeSizeArray(result.edges);
+		result.d3data                = core.getD3(result.edges, result.nodeSizeNeighborArray);
 
-		result.modularity_edge       = modularity.getModularityByEdgeCommunities([result.graphArray]);
+		result.density               = 2 * result.numberOfEdges / (result.numberOfNodes * (result.numberOfNodes - 1));
+
+		result.modularity_edge       = modularity.getModularityByEdgeCommunities([result.edges]);
+		result.modularity_node       = modularity.getModularityByNodeCommunities([result.nodes], result.nodeSizeArray, result.edges);
 
 		//우빈 중간결과 확인용
 		result.pageRank_Array        = core.pageRank(text, 0.0001);

@@ -259,6 +259,9 @@
 				formData.append("input_text", $("#input_text").val());
 				formData.append("input_file", $("#input_file")[0].files[0]);
 
+			// clear previous graph
+			svg.selectAll("*").remove();
+
 			$.ajax({
 				url: '/upload',
 				type: 'POST',
