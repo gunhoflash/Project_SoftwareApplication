@@ -1,6 +1,7 @@
 const express = require('express');
 const multer  = require('multer');
 const upload  = multer({ dest: 'uploads/' });
+const community = require('./core/community');
 const core    = require('./core/core');
 const modularity = require('./core/modularity');
 const app     = express();
@@ -47,21 +48,34 @@ analysis = text =>
 		
 		let result = core.parseTextGraph(text); // nodes and edges are in here
 
-		result.numberOfNodes         = result.nodes.length;
-		result.numberOfEdges         = result.edges.length;
+		result.numberOfNodes          = result.nodes.length;
+		result.numberOfEdges          = result.edges.length;
 
-		result.nodeSizeNeighborArray = core.getNodeSizeNeighborArray(result.edges);
-		result.nodeSizeArray         = core.getNodeSizeArray(result.edges);
-		result.d3data                = core.getD3(result.edges, result.nodeSizeNeighborArray);
+		result.nodeSizeNeighborArray  = core.getNodeSizeNeighborArray(result.edges);
+		result.nodeSizeArray          = core.getNodeSizeArray(result.edges);
 
-		result.density               = 2 * result.numberOfEdges / (result.numberOfNodes * (result.numberOfNodes - 1));
+		result.modularity_edge_before = modularity.getModularityByEdgeCommunities([result.edges]);
+		result.modularity_node_before = modularity.getModularityByNodeCommunities([result.nodes], result.nodeSizeArray, result.edges);
 
-		result.modularity_edge       = modularity.getModularityByEdgeCommunities([result.edges]);
-		result.modularity_node       = modularity.getModularityByNodeCommunities([result.nodes], result.nodeSizeArray, result.edges);
+		console.log(`nodes.length: ${result.nodes.length}`);
+		let communitized = community.findCommunities(result.nodes, result.edges,
+			result.nodeSizeArray, result.nodeSizeNeighborArray);
+
+		console.log(`nodes.length: ${result.nodes.length}`);
+		result.edges                  = communitized.edges;
+		result.numberOfEdges          = result.edges.length;
+		result.nodeSizeNeighborArray  = communitized.nodeSizeNeighborArray;
+		result.nodeSizeArray          = communitized.nodeSizeArray;
+		result.modularity_node        = communitized.modularity;
+
+		result.d3data                 = core.getD3(result.edges, result.nodeSizeNeighborArray);
+
+		result.density                = 2 * result.numberOfEdges / (result.numberOfNodes * (result.numberOfNodes - 1));
+
 
 		//우빈 중간결과 확인용
-		result.pageRank_Array        = core.pageRank(text, 0.0001);
-		result.HITS_Array            = core.HITS(text, 0.0001);
+		result.pageRank_Array         = core.pageRank(text, 0.0001);
+		result.HITS_Array             = core.HITS(text, 0.0001);
 		
 		// TODO: count the number of networks
 

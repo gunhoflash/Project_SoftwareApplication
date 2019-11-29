@@ -31,7 +31,7 @@ exports.getText = url => {
 
 exports.parseTextGraph = text => {
 
-	let i, textLine, node1, node2, nodeLast = -1;
+	let i, textLine, node1, node2, nodeTemp, nodeLast = -1;
 	let textLines;
 	let nodes = [];
 	let edges = [];
@@ -49,8 +49,15 @@ exports.parseTextGraph = text => {
 		if (!textLine || textLine.length < 2) continue;
 		node1 = Number(textLine[0]);
 		node2 = Number(textLine[1]);
-		nodeLast = Math.max(nodeLast, node1, node2);
-		edges.push([node1, node2]);
+
+		// swap to sort
+		if (node1 > node2) {
+			nodeTemp = node1;
+			node1 = node2;
+			node2 = nodeTemp;
+		}
+		nodeLast = (node1 > nodeLast) ? node1 : nodeLast;
+		edges.push([node1, node2]); // edge is sorted ascending
 	}
 
 	// nodes: [0, 1, 2, ..., max]
@@ -72,6 +79,13 @@ exports.getNodeSizeNeighborArray = edges => {
 		nodeSizeNeighborArray[node1].push(node2);
 		nodeSizeNeighborArray[node2].push(node1);
 	}
+
+	// handle undefined elements: for independent nodes
+	for (i = 0; i < nodeSizeNeighborArray.length; i++) {
+		if (nodeSizeNeighborArray[i] == undefined)
+			nodeSizeNeighborArray[i] = [];
+	}
+
 	return nodeSizeNeighborArray;
 };
 
@@ -141,6 +155,12 @@ exports.getD3 = (edges, getNodeSizeNeighborArray) => {
 			"target": target,
 			"intersect_ratio": intersect_ratio / max_intersect_ratio
 		});
+	}
+
+	// handle undefined elements: for independent nodes
+	for (i = 0; i < getNodeSizeNeighborArray.length; i++) {
+		if (cited[i] == undefined)
+			d3data.nodes.push({"id": i, "group": 1, "size": 0});
 	}
 
 	return d3data;

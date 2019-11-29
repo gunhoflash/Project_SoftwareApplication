@@ -202,7 +202,7 @@
 				.selectAll("circle")
 				.data(graph.nodes)
 				.enter().append("circle")
-				.attr("r", function(d) { return d.size / graph.maxNodeSize * 8 + 0.5; })//  return Math.log(d.size + 1) + 0.5; })
+				.attr("r", function(d) { return d.size / graph.maxNodeSize * 8 + 1; })//  return Math.log(d.size + 1) + 0.5; })
 				.attr("fill", () => "#aa0000")
 				.call(d3.drag()
 					.on("start", dragstarted)
