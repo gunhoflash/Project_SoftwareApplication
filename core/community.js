@@ -114,3 +114,15 @@ exports.findCommunities = (_nodes, _edges, _nodeSizeArray, _nodeSizeNeighborArra
 		nodeSizeNeighborArray: nodeSizeNeighborArray
 	};
 };
+
+exports.LinkCommunity =() =>{
+
+};
+
+exports.LabelPropagation =() =>{
+
+};
+
+exports.Louvain =() =>{
+
+};

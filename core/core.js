@@ -336,39 +336,3 @@ exports.HITS = (text,tolerance) => {
 	HITS_Array['authorities']=old_authorities;
 	return HITS_Array;//hubs와 authorities성분을가지는 dictionary를 반환
 };
-
-exports.Girvan_Newman =(graph) =>{
-	var new_mod=getModularityByEdgeCommunities(graph);
-	var old_mod=0;
-	var temp_edge=[];
-	var flag=0;
-	var i=0;
-	do
-	{
-		old_mod=new_mod;
-		temp_edge=deleteEdgeWithHighestBetweeness(graph);
-		//community가 분리되었는가 검증(모든 조합이 없는가)
-		if(flag==1)
-		{
-		//	graph의 community를 재정의
-			flag=0;
-		}
-		new_mod=getModularityByEdgeCommunities(graph);
-		if(old_mod>new_mod)
-		{
-		//	기억하고 있던 소거된 edge를 부착
-		}
-	}while(old_mod<=new_mod);
-};
-
-exports.LinkCommunity =() =>{
-
-};
-
-exports.LabelPropagation =() =>{
-
-};
-
-exports.Louvain =() =>{
-
-};
