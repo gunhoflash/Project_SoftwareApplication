@@ -31,7 +31,7 @@ exports.findCommunities = (_nodes, _edges, _nodeSizeArray, _nodeSizeNeighborArra
 	let ind1, ind2;
 
 	// calulate modularity and edge betweenesses
-	modularity = MODULARITY.getModularityByNodeCommunities(graph, nodeSizeArray, edges);
+	modularity = MODULARITY.getImprovedModularity(graph, nodeSizeArray, edges);
 	edges = EDGE.edgeBetweenesses(edges, nodeSizeNeighborArray);
 
 	// save initial state
@@ -99,7 +99,7 @@ exports.findCommunities = (_nodes, _edges, _nodeSizeArray, _nodeSizeNeighborArra
 		} else community_divided = null;
 
 		// calculate new modularity
-		modularity = MODULARITY.getModularityByNodeCommunities(graph, nodeSizeArray, edges);
+		modularity = MODULARITY.getImprovedModularity(graph, nodeSizeArray, edges);
 
 		/*
 			TODO: save the maximized-modularity status and loop it until

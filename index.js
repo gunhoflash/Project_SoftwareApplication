@@ -56,7 +56,7 @@ analysis = text =>
 		result.nodeSizeNeighborArray  = core.getNodeSizeNeighborArray(result.edges);
 		result.nodeSizeArray          = core.getNodeSizeArray(result.edges);
 
-		result.modularity             = modularity.getModularityByNodeCommunities([result.nodes], result.nodeSizeArray, result.edges);
+		result.modularity             = modularity.getImprovedModularity([result.nodes], result.nodeSizeArray, result.edges);
 
 		console.log(`nodes.length: ${result.nodes.length}`);
 		let communitized = community.findCommunities(result.nodes, result.edges,
