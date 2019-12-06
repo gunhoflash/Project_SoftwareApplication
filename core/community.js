@@ -123,6 +123,20 @@ exports.LabelPropagation =() =>{
 
 };
 
-exports.Louvain =() =>{
+exports.Louvain =(graph) =>{
+	//phase1
+	console.log("I'm in Louvain");
+	/*
+	graph
+		- nodes : 노드 번호 배열
+		- edges : edge 배열
+		- num_of_nodes : 노드 개수
+		- num_of_edges : edge 개수
+		- nodeSizeNeighborArray : 이웃노드 번호 배열
+		- nodeSizeArray : 이웃노드 개수 배열
+	*/
+	
+	//phase2
+
 
 };
