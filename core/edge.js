@@ -1,10 +1,11 @@
 exports.edgeBetweeness = (node1, node2, nodeSizeNeighborArray) => {
 	let size_intersection, size_union;
 
-	size_union = [...new Set([...nodeSizeNeighborArray[node1], ...nodeSizeNeighborArray[node2]])].length;
-	size_intersection = nodeSizeNeighborArray[node1].filter(n => nodeSizeNeighborArray[node2].includes(n)).length - 2;
-
-	return (size_intersection > 0) ? size_union / size_intersection : 0;
+	// suppose that node1 and node2 is linked
+	size_union = [...new Set([...nodeSizeNeighborArray[node1], ...nodeSizeNeighborArray[node2]])].length - 2;
+	size_intersection = nodeSizeNeighborArray[node1].filter(n => nodeSizeNeighborArray[node2].includes(n)).length;
+	
+	return (size_union > 0) ? size_intersection / size_union : 0;
 };
 
 exports.edgeBetweenesses = (edges, nodeSizeNeighborArray, updateOnlyPair = null) => {
@@ -43,7 +44,7 @@ exports.hasPath = (node1, node2, nodeSizeNeighborArray) => {
 	queue.push(node1);
 	queued[node1] = true;
 
-	while (i < queue.length - 1) {
+	while (i < queue.length) {
 
 		// visit a new node
 		now = queue[i++];
@@ -57,8 +58,10 @@ exports.hasPath = (node1, node2, nodeSizeNeighborArray) => {
 
 		// queue the new neighbor nodes
 		for (let neighbor of nodeSizeNeighborArray[now]) {
-			if (!queued[neighbor])
+			if (!queued[neighbor]) {
+				queued[neighbor] = true;
 				queue.push(neighbor);
+			}
 		}
 	}
 

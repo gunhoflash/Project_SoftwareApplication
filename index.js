@@ -3,6 +3,7 @@ const multer  = require('multer');
 const upload  = multer({ dest: 'uploads/' });
 const community = require('./core/community');
 const core    = require('./core/core');
+const d3data  = require('./core/d3data');
 const modularity = require('./core/modularity');
 const app     = express();
 
@@ -47,6 +48,7 @@ analysis = text =>
 		if (!text) return reject(`invalid input to analyze`);
 		
 		let result = core.parseTextGraph(text); // nodes and edges are in here
+		console.log(`result initialized: ${result}`);
 
 		result.numberOfNodes          = result.nodes.length;
 		result.numberOfEdges          = result.edges.length;
@@ -54,28 +56,27 @@ analysis = text =>
 		result.nodeSizeNeighborArray  = core.getNodeSizeNeighborArray(result.edges);
 		result.nodeSizeArray          = core.getNodeSizeArray(result.edges);
 
-		result.modularity_edge_before = modularity.getModularityByEdgeCommunities([result.edges]);
-		result.modularity_node_before = modularity.getModularityByNodeCommunities([result.nodes], result.nodeSizeArray, result.edges);
+		result.modularity             = modularity.getModularityByNodeCommunities([result.nodes], result.nodeSizeArray, result.edges);
 
 		console.log(`nodes.length: ${result.nodes.length}`);
 		let communitized = community.findCommunities(result.nodes, result.edges,
 			result.nodeSizeArray, result.nodeSizeNeighborArray);
 
-		console.log(`nodes.length: ${result.nodes.length}`);
-		result.edges                  = communitized.edges;
-		result.numberOfEdges          = result.edges.length;
-		result.nodeSizeNeighborArray  = communitized.nodeSizeNeighborArray;
-		result.nodeSizeArray          = communitized.nodeSizeArray;
-		result.modularity_node        = communitized.modularity;
+		result.edges_communitized                  = communitized.edges;
+		result.numberOfEdges_communitized          = result.edges_communitized.length;
+		result.nodeSizeNeighborArray_communitized  = communitized.nodeSizeNeighborArray;
+		result.nodeSizeArray_communitized          = communitized.nodeSizeArray;
+		result.modularity_communitized             = communitized.modularity;
+		result.deleted_edges                       = communitized.deleted_edges;
 
-		result.d3data                 = core.getD3(result.edges, result.nodeSizeNeighborArray);
+		result.d3data                 = d3data.getD3(result.edges_communitized, result.deleted_edges, result.nodeSizeNeighborArray);
+		//result.d3data                 = d3data.getD3(result.edges, [], result.nodeSizeNeighborArray);
 
 		result.density                = 2 * result.numberOfEdges / (result.numberOfNodes * (result.numberOfNodes - 1));
 
-
 		//우빈 중간결과 확인용
-		result.pageRank_Array         = core.pageRank(text, 0.0001);
-		result.HITS_Array             = core.HITS(text, 0.0001);
+		//result.pageRank_Array         = core.pageRank(text, 0.0001);
+		//result.HITS_Array             = core.HITS(text, 0.0001);
 		
 		// TODO: count the number of networks
 

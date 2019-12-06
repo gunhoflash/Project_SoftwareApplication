@@ -51,7 +51,7 @@ exports.parseTextGraph = text => {
 		node2 = Number(textLine[1]);
 
 		// swap to sort
-		if (node1 > node2) {
+		if (node2 > node1) {
 			nodeTemp = node1;
 			node1 = node2;
 			node2 = nodeTemp;
@@ -113,59 +113,6 @@ exports.getLinkValueArray = () => {
 
 };
 
-exports.getD3 = (edges, getNodeSizeNeighborArray) => {
-	let source, target, node_value_source, node_value_target, intersect, outersect, intersect_ratio, max_intersect_ratio = 0;
-	let cited = [];
-	let d3data = {
-		"nodes": [],
-		"links": [],
-		"maxLinkValue": 0,
-		"maxNodeSize": 0
-	};
-
-	for (let i = 0; i < edges.length; i++) {
-		source = edges[i][0];
-		target = edges[i][1];
-
-		node_value_source   = getNodeSizeNeighborArray[source]          ? getNodeSizeNeighborArray[source].length : 0;
-		node_value_target   = getNodeSizeNeighborArray[target]          ? getNodeSizeNeighborArray[target].length : 0;
-
-		intersect = getNumberOfIntersection(getNodeSizeNeighborArray[source], getNodeSizeNeighborArray[target]);
-		outersect = getNumberOfOutersection(getNodeSizeNeighborArray[source], getNodeSizeNeighborArray[target]) - 2;
-
-		intersect_ratio     = (outersect           > 0                ) ? intersect / outersect                   : 0;
-		max_intersect_ratio = (max_intersect_ratio < intersect_ratio  ) ? intersect_ratio                         : max_intersect_ratio;
-
-		d3data.maxLinkValue = (d3data.maxLinkValue > intersect        ) ? d3data.maxLinkValue                     : intersect;
-		d3data.maxNodeSize  = (d3data.maxNodeSize  > node_value_source) ? d3data.maxNodeSize                      : node_value_source;
-		d3data.maxNodeSize  = (d3data.maxNodeSize  > node_value_target) ? d3data.maxNodeSize                      : node_value_target;
-
-		if (!cited[source])
-		{
-			d3data.nodes.push({"id": source, "group": 1, "size": node_value_source});
-			cited[source] = 1;
-		}
-		if (!cited[target])
-		{
-			d3data.nodes.push({"id": target, "group": 1, "size": node_value_target});
-			cited[target] = 1;
-		}
-		d3data.links.push({
-			"source": source,
-			"target": target,
-			"intersect_ratio": intersect_ratio / max_intersect_ratio
-		});
-	}
-
-	// handle undefined elements: for independent nodes
-	for (i = 0; i < getNodeSizeNeighborArray.length; i++) {
-		if (cited[i] == undefined)
-			d3data.nodes.push({"id": i, "group": 1, "size": 0});
-	}
-
-	return d3data;
-};
-
 exports.arrayMax = array => {
 	let max = 0;
 	for (let i = 0; i < array.length; i++) {
@@ -176,14 +123,6 @@ exports.arrayMax = array => {
 
 exports.calculateWeightByNeighbor = () => {
 
-};
-
-getNumberOfIntersection = (array1, array2) => {
-	return array1.filter(value => array2.includes(value)).length;
-};
-
-getNumberOfOutersection = (array1, array2) => {
-	return [...new Set([...array1, ...array2])].length;
 };
 
 exports.pageRank = (text, tolerance) => {
