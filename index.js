@@ -75,8 +75,9 @@ analysis = text =>
 		result.density                = 2 * result.numberOfEdges / (result.numberOfNodes * (result.numberOfNodes - 1));
 
 		//우빈 중간결과 확인용
-		//result.pageRank_Array         = core.pageRank(text, 0.0001);
-		//result.HITS_Array             = core.HITS(text, 0.0001);
+		result.pageRank_Array         = core.pageRank(text, 0.0001);
+		result.HITS_Array             = core.HITS(text, 0.0001);
+		community.Louvain(result);
 		
 		// TODO: count the number of networks
 
