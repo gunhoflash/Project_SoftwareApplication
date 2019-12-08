@@ -146,14 +146,6 @@ saveState = (graph, edges, modularity, nodeSizeArray, nodeSizeNeighborArray, del
 	maximumModularityState.deleted_edges         = ARRAY.clone_deep(deleted_edges);
 };
 
-exports.LinkCommunity =() =>{
-
-};
-
-exports.LabelPropagation =() =>{
-
-};
-
 exports.Louvain =(graph) =>{
 	//사용할 변수, 리스트, 객체 세팅
 	console.log("I'm in Louvain");
@@ -166,42 +158,88 @@ exports.Louvain =(graph) =>{
 		- nodeSizeNeighborArray : 이웃노드 번호 배열
 		- nodeSizeArray : 이웃노드 개수 배열
 	*/
-
-	var community_L = {	//community 정의
-		CID : null,
-		nodes : null,
-		edges : null	
-	};
-
+	var neighbors=graph.nodeSizeNeighborArray;
 	var num_of_nodes=graph.nodes.length;
-	var i=0, j=0;
-	var randomized_node_list=[];
+	var num_of_edges=graph.edges.length;
+	var i=0, j=0, k=0;
+	var node_list=[];
+	var community_list=[];
+	var edge_list=[];
 	for(i=0; i<num_of_nodes; i++) //노드의 번호에 상관없이 랜덤한 노드를 선택하여 실행하기위한 리스트 생성
 	{
-		randomized_node_list[i]=Math.floor(Math.random()*(num_of_nodes+1));
+		node_list[i]={//node형태 정의
+			CID : null
+		};
+		community_list[i]={	//community 정의
+			nodes : [],
+			neighborCommunities : []	
+		};
+
+		node_list[i].CID=Math.floor(Math.random()*(num_of_nodes));
 		for(j=0; j<i; j++)
 		{
-			if(randomized_node_list[i]==randomized_node_list[j])
+			if(node_list[i].CID==node_list[j].CID)
 			{
 				i--;
 				break;
 			}
 		}
 	}
-	//console.log("randomized array : "+randomized_node_list);
-
 	for(i=0; i<num_of_nodes; i++)
+	{		
+		community_list[node_list[i].CID].nodes[0]=i; //community_list의 nodes 초기화
+	}
+	for(i=0; i<community_list.length; i++)
+	{		
+		for(j=0; j<neighbors[community_list[i].nodes[0]].length; j++)
+		{
+			community_list[i].neighborCommunities.push(node_list[neighbors[community_list[i].nodes[0]][j]].CID);//community_list의 neighborCommunities 초기화
+		}
+	}
+	for(i=0; i<num_of_edges; i++)
 	{
 		
 	}
-
-	//phase1
+	/*
 	for(i=0; i<num_of_nodes; i++)
 	{
-		for(j=0; j<graph.nodeSizeNeighborArray[i].length; j++)
-		{
+		console.log(neighbors[i]);
+	}
+	for(i=0; i<num_of_nodes; i++)
+	{
+		console.log(node_list[i].node_num+"	"+node_list[i].CID);
+		console.log(community_list[i].nodes+"	"+community_list[i].neighborCommunities+"\n");
+	}
+	*/
 
+
+	/*
+	community_list[i]
+		i : community ID
+		community_list[i].nodes : i community에 포함되는 노드 번호의 배열
+		community_list[i].neighborCommunities : i community와 이웃하는 community ID의 배열
+
+	node_list[i]
+		i : node ID
+		noed_list[i].CID : node i가 포함된 community의 ID
+	*/
+	var num_of_change=0;
+	var delta_M;
+	//phase1
+	while(num_of_change!=0)
+	{
+		num_of_change=0;
+		for(i=0; i<community_list.length; i++)
+		{
+			for(j=0; j<community_list[i].nodes.length; j++)
+			{
+				for(k=0; k<community_list[i].neighborCommunities.length; k++)
+				{
+					delta_M=0;
+				}
+			}
 		}
+
 	}
 	//phase2
 
