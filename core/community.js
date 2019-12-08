@@ -153,8 +153,158 @@ exports.LinkCommunity =() =>{
 
 };
 
-exports.LabelPropagation =() =>{
+// semi only
+// refer to https://www.isislab.it/cordasco/papers/BASNA10/BASNA_pres.pdf from https://www.nature.com/articles/srep30750
+exports.labelPropagation = (numberOfNodes, _nodeSizeNeighborArray) => {
 
+	let i, j, k;
+	let nodeSizeNeighborArray = ARRAY.clone_deep(_nodeSizeNeighborArray);
+
+	let colors = [-1]; // colors[i] is the color of node-i
+	let color_groups = []; // colors[i] is the array of nodes that has color-i
+	
+	let communites = []; // communites[i] is the community-ID of node-i
+
+	/*
+		coloring with bfs
+	*/
+	let opend = [0]; // array of opened nodes
+	while (1) {
+		let visit;
+		if (opend.length > 0) {
+			// select next nodes to visit
+			visit = opend.shift();
+		} else {
+			// if node wasn't selected, find from colors[] == undefined
+			for (i = 0; i < numberOfNodes; i++) {
+				if (colors[i] == undefined) {
+					// node found
+					visit = i;
+					break;
+				}
+			}
+			if (i == numberOfNodes) {
+				// node not found
+				break;
+			}
+		}
+
+		// set color of the node
+		let neighborhoods = nodeSizeNeighborArray[visit];
+		let color, bannedColors = [];
+		for (i = 0; i < color_groups.length + 1; i++)
+			bannedColors.push(0);
+		// look neighbors
+		for (i = 0; i < neighborhoods.length; i++) {
+			color = colors[neighborhoods[i]]; // get a neighbors color
+			if (color == undefined) {
+				// open the neighbor
+				opend.push(neighborhoods[i]);
+				colors[neighborhoods[i]] = -1;
+				continue;
+			} else if (color < 0) continue; // opended neighbor
+			bannedColors[color] = 1; // ban the color
+		}
+
+		// find a color not banned
+		for (i = 0; i < bannedColors.length; i++) {
+			if (bannedColors[i] == 0) {
+				colors[visit] = i;
+				if (i == bannedColors.length - 1) {
+					// new color
+					color_groups.push([visit]);
+				} else {
+					// existing color
+					color_groups[i].push(visit);
+				}
+				break;
+			}
+		}
+	}
+	console.log(`all nodes was colored`);
+	//console.log(colors);
+	//console.log(color_groups);
+
+	/*
+		Initialize communities
+	*/
+	for (i = 0; i < numberOfNodes; i++) {
+		communites[i] = i;
+	}
+	console.log(`all communities are initialized`);
+	//console.log(communites);
+
+	/*
+		Start LPA
+	*/
+	let _numberOfCommunities = [];
+	for (i = 0; i < numberOfNodes; i++)
+	_numberOfCommunities[i] = 0;
+	console.log(`start LPA`);
+	while(1) {
+		//console.log(`\n -- LPA --`);
+		let convergence = true;
+		// for all color groups
+		for (i = 0; i < color_groups.length; i++) {
+			// for all nodees in the group
+			for (j = 0; j < color_groups[i].length; j++) {
+				// get the major community of its neighbors
+				let node = color_groups[i][j];
+				let neighbors = nodeSizeNeighborArray[node];
+				if (neighbors.length == 0) continue;
+
+				///console.log(`node: ${node}`);
+
+				let numberOfCommunities = _numberOfCommunities.slice();
+				for (let neighbor of neighbors) {
+					numberOfCommunities[communites[neighbor]]++;
+				}
+
+				// filter only major communities
+				let majorNumber = 0;
+				let majorCommunities = [];
+
+				for (k = 0; k < numberOfCommunities.length; k++) {
+					if (numberOfCommunities[k] > majorNumber) {
+						majorNumber = numberOfCommunities[k];
+						majorCommunities = [k];
+					} else if (numberOfCommunities[k] == majorNumber) {
+						majorCommunities.push(k);
+					}
+				}
+				//console.log(`major communites:`);
+				//console.log(majorCommunities);
+				// select a random community among major communities
+				majorCommunities = majorCommunities[parseInt(Math.random() * majorCommunities.length)];
+				if (communites[node] != majorCommunities) {
+					convergence = false;
+					communites[node] = majorCommunities;
+				}
+			}
+		}
+
+		// check state converged
+		if (convergence) break;
+	}
+
+	// make graph from communities
+	let _graph = [];
+	for (i = 0; i < communites.length; i++) {
+		if (communites[i] > 0) {
+			if (_graph[communites[i]] == undefined)
+				_graph[communites[i]] = [];
+			_graph[communites[i]].push(i);
+		}
+	}
+
+	for (i = 0; i < _graph.length; i++) {
+		if (_graph[i] == undefined) {
+			_graph.splice(i, 1);
+			i--;
+		}
+	}
+
+	return _graph;
 };
 
 // MODULARITY.getImprovedModularity(graph, nodeSizeArray, edges)

@@ -85,10 +85,12 @@
 
 		var big_score;
 
+		var community_random_colors;
+
 		/*
-		
-		drag
-		
+
+			drag
+
 		*/
 		function dragstarted(d) {
 			if (!d3.event.active) simulation.alphaTarget(0.3).restart();
@@ -104,6 +106,12 @@
 			d.fx = null;
 			d.fy = null;
 		}
+
+		/*
+
+			fps and tick
+
+		*/
 
 		// set fps
 		function set_fps(_fps) {
@@ -136,6 +144,47 @@
 				.attr("cy", function (d) { return d.y; });
 		}
 
+		/*
+
+			color and visualize
+
+		*/
+		function generateRandomColors(length) {
+			console.log("generate random colors");
+			var hexString;
+			var max, red, green, blue, plus;
+			community_random_colors = [
+				'#2979FF',
+				'#FF1744',
+				'#FFEA00',
+				'#64FFDA',
+				'#C6FF00',
+				'#2E7D32',
+				'#673AB7',
+				'#D500F9',
+				'#00E676',
+				'#FB8C00',
+				'#795548',
+				'#5D4037',
+				'#424242',
+			];
+			while (length--) {
+				plus   = parseInt(Math.random() * 3);
+				red    = Math.pow(Math.random(), 2);
+				green  = Math.pow(Math.random(), 2);
+				blue   = Math.pow(Math.random(), 2);
+				max    = Math.max(red, green, blue);
+				if (red   == max) { green *= 0.7; blue  *= 0.7; }
+				if (green == max) { red   *= 0.7; blue  *= 0.7; }
+				if (blue  == max) { red   *= 0.7; green *= 0.7; }
+				red    = ('00' + parseInt(red   / max * 215).toString(16)).substr(-2);
+				green  = ('00' + parseInt(green / max * 70 + 80).toString(16)).substr(-2);
+				blue   = ('00' + parseInt(blue  / max * 215).toString(16)).substr(-2);
+				community_random_colors.push('#' + red + green + blue);
+			}
+			console.log(community_random_colors);
+		}
+
 		// load analyzed data from server and visualize
 		function visualize(result) {
 
@@ -146,6 +195,8 @@
 
 			// log data to test
 			console.log(data);
+
+			generateRandomColors(data.numberOfCommunities);
 
 			graph = data.d3data;
 			
@@ -176,7 +227,13 @@
 				.data(graph.links)
 				.enter().append("line")
 				.attr("stroke-opacity", function (d) {
-					return d.intersect_ratio * 0.85 + 0.15;
+					if (data.numberOfEdges < 100)
+						return d.intersect_ratio * 0.5 + 0.5;
+					if (data.numberOfEdges < 1000)
+						return d.intersect_ratio * 0.7 + 0.3;
+					if (data.numberOfEdges < 10000)
+						return d.intersect_ratio * 0.85 + 0.15;
+					return d.intersect_ratio * 0.9 + 0.1;
 				})
 				.attr("display", function (d) {
 					if (d.is_deleted == 'Y') return "none";
@@ -187,11 +244,10 @@
 				})
 				.attr("stroke", function (d) {
 					var rank = 1 - d.intersect_ratio;
-					var r = Math.sqrt(1 - rank) * 255;
-					//var g = (rank >= 0.25 && rank < 0.5) ? (rank - 0.25) * 4 * 255
-					//		: ((rank >= 0.5 && rank <= 0.75) ? (0.75 - rank) * 4 * 255 : 0);
-					var g = (rank < 0.2) ? 0 : ((rank < 0.6) ? rank / 0.6 * 240 : Math.sqrt((1 - rank) / 0.4) * 240);
-					var b = (rank > 0.5) ? (rank - 0.5) / 0.5 * 255 : 0;
+					var r = 16 + (Math.sqrt(1 - rank) * 239);
+					var g = 10 + ((rank < 0.3) ? 0 :
+						((rank < 0.6) ? rank / 0.6 * 230 : Math.sqrt((1 - rank) / 0.4) * 200) + 30);
+					var b = 12 + ((rank > 0.6) ? (rank - 0.6) / 0.4 * 250 : 0);
 					
 					return "rgb(" + Math.floor(r) + "," + Math.floor(g) +","+ Math.floor(b) + ")";
 				});
@@ -208,7 +264,9 @@
 					else
 						return 1;
 				})
-				.attr("fill", () => "#aa0000")
+				.attr("fill", function (d) {
+					return community_random_colors[d.group];
+				})
 				.call(d3.drag()
 					.on("start", dragstarted)
 					.on("drag", dragged)
@@ -223,9 +281,9 @@
 				})
 			);
 
-			/*var lables = node.append("text")
+		/*var lables = node.append("text")
 				.text(function (d) {
-					return d.id;
+					return d.group;
 				})
 				.attr('x', 6)
 				.attr('y', 3);*/
@@ -233,7 +291,7 @@
 			// set title of each node
 			node.append("title")
 				.text(function (d) {
-					return d.id;
+					return d.group;
 				});
 
 			set_fps(fps);

@@ -57,9 +57,13 @@ analysis = text =>
 		result.nodeSizeArray          = core.getNodeSizeArray(result.edges);
 
 		result.modularity             = modularity.getImprovedModularity([result.nodes], result.nodeSizeArray, result.edges);
+		let labelPropagationGraph     = community.labelPropagation(result.numberOfNodes, result.nodeSizeNeighborArray);
+		result.numberOfCommunities    = labelPropagationGraph.length;
+
+		//throw Error("hehehehehehe");
 
 		console.log(`nodes.length: ${result.nodes.length}`);
-		let communitized = community.findCommunities(result.nodes, result.edges,
+		/*let communitized = community.findCommunities(result.nodes, result.edges,
 			result.nodeSizeArray, result.nodeSizeNeighborArray, 1);
 
 		result.edges_communitized                  = communitized.edges;
@@ -68,16 +72,16 @@ analysis = text =>
 		result.nodeSizeArray_communitized          = communitized.nodeSizeArray;
 		result.modularity_communitized             = communitized.modularity;
 		result.deleted_edges                       = communitized.deleted_edges;
-
-		result.d3data                 = d3data.getD3(communitized.graph, result.edges_communitized, result.deleted_edges, result.nodeSizeNeighborArray);
+*/
+		result.d3data                 = d3data.getD3(labelPropagationGraph, result.edges, [], result.nodeSizeNeighborArray);
 		//result.d3data                 = d3data.getD3(result.edges, [], result.nodeSizeNeighborArray);
 
 		result.density                = 2 * result.numberOfEdges / (result.numberOfNodes * (result.numberOfNodes - 1));
 
 		//우빈 중간결과 확인용
-		result.pageRank_Array         = core.pageRank(result.nodeSizeArray, result.nodeSizeNeighborArray, 0.0001);
-		result.HITS_Array             = core.HITS(text, 0.0001);
-		community.Louvain(result);
+		//result.pageRank_Array         = core.pageRank(result.nodeSizeArray, result.nodeSizeNeighborArray, 0.0001);
+		//result.HITS_Array             = core.HITS(text, 0.0001);
+		//community.Louvain(result);
 		
 		// TODO: count the number of networks
 
