@@ -34,7 +34,7 @@ exports.findCommunities = (_nodes, _edges, _nodeSizeArray, _nodeSizeNeighborArra
 
 	// calulate modularity and edge betweenesses
 	modularity = MODULARITY.getImprovedModularity(graph, nodeSizeArray, edges);
-	edges = EDGE.edgeBetweenesses(edges, nodeSizeNeighborArray, pageRank);
+	edges = EDGE.neighborhoods(edges, nodeSizeNeighborArray, pageRank);
 
 	// save initial state
 	saveState(graph, edges, modularity, nodeSizeArray, nodeSizeNeighborArray, deleted_edges);
@@ -126,7 +126,7 @@ exports.findCommunities = (_nodes, _edges, _nodeSizeArray, _nodeSizeNeighborArra
 
 		// re-calculate edge betweeness
 		pageRank = CORE.pageRank(nodeSizeArray, nodeSizeNeighborArray, 0.0001);
-		edges = EDGE.edgeBetweenesses(edges, nodeSizeNeighborArray, pageRank, edge_deleted);
+		edges = EDGE.neighborhoods(edges, nodeSizeNeighborArray, pageRank, edge_deleted);
 
 		deleted_edges.push(edge_deleted);
 
@@ -157,6 +157,7 @@ exports.LabelPropagation =() =>{
 
 };
 
+// MODULARITY.getImprovedModularity(graph, nodeSizeArray, edges)
 exports.Louvain =(graph) =>{
 	//사용할 변수, 리스트, 객체 세팅
 	console.log("I'm in Louvain");

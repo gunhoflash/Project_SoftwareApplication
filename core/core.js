@@ -1,5 +1,6 @@
 const fs = require('fs');
 const ARRAY = require('./array');
+const MODULARITY = require('./modularity');
 
 // delete all files in the folder
 exports.clearFolder = path => {

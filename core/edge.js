@@ -1,4 +1,4 @@
-edgeBetweeness = (node1, node2, nodeSizeNeighborArray) => {
+neighborhood = (node1, node2, nodeSizeNeighborArray) => {
 	let size_intersection, size_union;
 
 	// suppose that node1 and node2 is linked
@@ -8,7 +8,7 @@ edgeBetweeness = (node1, node2, nodeSizeNeighborArray) => {
 	return (size_union > 0) ? size_intersection / size_union : 0;
 };
 
-exports.edgeBetweenesses = (edges, nodeSizeNeighborArray, pageRank, updateOnlyPair = null) => {
+exports.neighborhoods = (edges, nodeSizeNeighborArray, pageRank, updateOnlyPair = null) => {
 	let i, len = edges.length;
 	let node1, node2;
 
@@ -19,13 +19,37 @@ exports.edgeBetweenesses = (edges, nodeSizeNeighborArray, pageRank, updateOnlyPa
 			node2 = edges[i][1];
 			if (node1 == updateOnlyPair[0] || node1 == updateOnlyPair[1]
 				|| node2 == updateOnlyPair[0] || node2 == updateOnlyPair[1])
-				edges[i][2] = edgeBetweeness(node1, node2, nodeSizeNeighborArray) - (pageRank[node1] + pageRank[node2]);
+				edges[i][2] = neighborhood(node1, node2, nodeSizeNeighborArray) - (pageRank[node1] + pageRank[node2]);
 		}
 	} else {
 		for (i = 0; i < len; i++) {
 			node1 = edges[i][0];
 			node2 = edges[i][1];
-			edges[i][2] = edgeBetweeness(node1, node2, nodeSizeNeighborArray);
+			edges[i][2] = neighborhood(node1, node2, nodeSizeNeighborArray);
+		}
+	}
+
+	return edges;
+};
+
+exports.neighborhoods = (edges, nodeSizeNeighborArray, pageRank, updateOnlyPair = null) => {
+	let i, len = edges.length;
+	let node1, node2;
+
+	// TODO: optimize
+	if (updateOnlyPair) {
+		for (i = 0; i < len; i++) {
+			node1 = edges[i][0];
+			node2 = edges[i][1];
+			if (node1 == updateOnlyPair[0] || node1 == updateOnlyPair[1]
+				|| node2 == updateOnlyPair[0] || node2 == updateOnlyPair[1])
+				edges[i][2] = neighborhood(node1, node2, nodeSizeNeighborArray) - (pageRank[node1] + pageRank[node2]);
+		}
+	} else {
+		for (i = 0; i < len; i++) {
+			node1 = edges[i][0];
+			node2 = edges[i][1];
+			edges[i][2] = neighborhood(node1, node2, nodeSizeNeighborArray);
 		}
 	}
 
