@@ -1,4 +1,5 @@
 const fs = require('fs');
+const ARRAY = require('./array');
 
 // delete all files in the folder
 exports.clearFolder = path => {
@@ -125,10 +126,9 @@ exports.calculateWeightByNeighbor = () => {
 
 };
 
-exports.pageRank = (text, tolerance) => {
-	var file_array=this.parseTextGraph(text).edges;//입력받은 text를 array형태로 변환
-	var num_of_neighbor=this.getNodeSizeArray(file_array);//각 노드의 이웃 수를 배열형태로 저장
-	var arr_of_neighbor=this.getNodeSizeNeighborArray(file_array);//각 노드의 이웃을 나열한 배열을 배열형태로 저장(즉, 2차원배열)
+exports.pageRank = (nodeSizeArray, nodeSizeNeighborArray, tolerance) => {
+	var num_of_neighbor=ARRAY.clone_deep(nodeSizeArray);//각 노드의 이웃 수를 배열형태로 저장
+	var arr_of_neighbor=ARRAY.clone_deep(nodeSizeNeighborArray);//각 노드의 이웃을 나열한 배열을 배열형태로 저장(즉, 2차원배열)
 	var pageRank_table=[];
 	var length=num_of_neighbor.length;//나중에 자주쓰게될 배열길이 length 생성
 	for(var i=0; i<length; i++)

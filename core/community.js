@@ -1,5 +1,6 @@
 const ARRAY = require('./array');
 const MODULARITY = require('./modularity');
+const CORE = require('./core');
 const EDGE = require('./edge');
 const maximumModularityState = {
 	graph: [],
@@ -16,11 +17,12 @@ const maximumModularityState = {
 	node: i
 	edge: [i, j]
 */
-exports.findCommunities = (_nodes, _edges, _nodeSizeArray, _nodeSizeNeighborArray, unlink_step_size = 'AUTO') => {
+exports.findCommunities = (_nodes, _edges, _nodeSizeArray, _nodeSizeNeighborArray, _pageRank, unlink_step_size = 'AUTO') => {
 	let nodes                 = ARRAY.clone_deep(_nodes);
 	let edges                 = ARRAY.clone_deep(_edges);
 	let nodeSizeArray         = ARRAY.clone_deep(_nodeSizeArray);
 	let nodeSizeNeighborArray = ARRAY.clone_deep(_nodeSizeNeighborArray);
+	let pageRank              = ARRAY.clone_deep(_pageRank);
 	let deleted_edges         = [];
 
 	let graph = [nodes];
@@ -32,7 +34,7 @@ exports.findCommunities = (_nodes, _edges, _nodeSizeArray, _nodeSizeNeighborArra
 
 	// calulate modularity and edge betweenesses
 	modularity = MODULARITY.getImprovedModularity(graph, nodeSizeArray, edges);
-	edges = EDGE.edgeBetweenesses(edges, nodeSizeNeighborArray);
+	edges = EDGE.edgeBetweenesses(edges, nodeSizeNeighborArray, pageRank);
 
 	// save initial state
 	saveState(graph, edges, modularity, nodeSizeArray, nodeSizeNeighborArray, deleted_edges);
@@ -123,7 +125,8 @@ exports.findCommunities = (_nodes, _edges, _nodeSizeArray, _nodeSizeNeighborArra
 		*/
 
 		// re-calculate edge betweeness
-		edges = EDGE.edgeBetweenesses(edges, nodeSizeNeighborArray, edge_deleted);
+		pageRank = CORE.pageRank(nodeSizeArray, nodeSizeNeighborArray, 0.0001);
+		edges = EDGE.edgeBetweenesses(edges, nodeSizeNeighborArray, pageRank, edge_deleted);
 
 		deleted_edges.push(edge_deleted);
 
