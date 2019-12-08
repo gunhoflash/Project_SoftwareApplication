@@ -161,7 +161,7 @@ exports.LabelPropagation =() =>{
 exports.Louvain =(graph) =>{
 	//사용할 변수, 리스트, 객체 세팅
 	console.log("I'm in Louvain");
-	/*
+	/*----------------------------------------------------------------------------------------------------------------------------------------
 	graph
 		- nodes : 노드 번호 배열
 		- edges : edge 배열
@@ -173,7 +173,7 @@ exports.Louvain =(graph) =>{
 	var neighbors=graph.nodeSizeNeighborArray;
 	var num_of_nodes=graph.nodes.length;
 	var num_of_edges=graph.edges.length;
-	var i=0, j=0, k=0;
+	var i=0, j=0, k=0, counter=0;
 	var node_list=[];
 	var community_list=[];
 	var edge_list=[];
@@ -197,10 +197,12 @@ exports.Louvain =(graph) =>{
 			}
 		}
 	}
+
 	for(i=0; i<num_of_nodes; i++)
 	{		
 		community_list[node_list[i].CID].nodes[0]=i; //community_list의 nodes 초기화
 	}
+
 	for(i=0; i<community_list.length; i++)
 	{		
 		for(j=0; j<neighbors[community_list[i].nodes[0]].length; j++)
@@ -208,10 +210,26 @@ exports.Louvain =(graph) =>{
 			community_list[i].neighborCommunities.push(node_list[neighbors[community_list[i].nodes[0]][j]].CID);//community_list의 neighborCommunities 초기화
 		}
 	}
-	for(i=0; i<num_of_edges; i++)
-	{
 
+	counter=0;
+	for(i=0; i<community_list.length; i++)
+	{
+		for(j=0; j<community_list[i].neighborCommunities.length; j++)
+		{
+			if(i<community_list[i].neighborCommunities[j])
+			{
+				edge_list[counter]={
+					edge : [],
+					weight : 0
+				};
+				edge_list[counter].edge[0]=i;
+				edge_list[counter].edge[1]=community_list[i].neighborCommunities[j];
+				edge_list[counter].weight+=1;
+				counter++;
+			}
+		}
 	}
+	
 	/*
 	for(i=0; i<num_of_nodes; i++)
 	{
@@ -221,11 +239,15 @@ exports.Louvain =(graph) =>{
 	{
 		console.log(node_list[i].node_num+"	"+node_list[i].CID);
 		console.log(community_list[i].nodes+"	"+community_list[i].neighborCommunities+"\n");
+	}	
+	for(i=0; i<edge_list.length; i++)
+	{
+		console.log(edge_list[i].edge+"	"+edge_list[i].weight);
 	}
 	*/
 
 
-	/*
+	/*------------------------------------------------------------------------------------------------------------------------------------------------
 	community_list[i]
 		i : community ID
 		community_list[i].nodes : i community에 포함되는 노드 번호의 배열
@@ -238,22 +260,11 @@ exports.Louvain =(graph) =>{
 	var num_of_change=0;
 	var delta_M;
 	//phase1
-	while(num_of_change!=0)
-	{
-		num_of_change=0;
-		for(i=0; i<community_list.length; i++)
-		{
-			for(j=0; j<community_list[i].nodes.length; j++)
-			{
-				for(k=0; k<community_list[i].neighborCommunities.length; k++)
-				{
-					delta_M=0;
-				}
-			}
-		}
-
-	}
+	this.louvainPhase1();
 	//phase2
 
 
 };
+
+exports.louvainPhase1 =(community_list, edge_list) =>{
+}
