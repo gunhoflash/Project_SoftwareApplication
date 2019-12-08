@@ -179,7 +179,7 @@
 					return d.intersect_ratio * 0.85 + 0.15;
 				})
 				.attr("display", function (d) {
-					if (d.is_deleted) return "none";
+					if (d.is_deleted == 'Y') return "none";
 					else return "";
 				})
 				.attr("stroke-width", function (d) {

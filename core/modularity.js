@@ -173,8 +173,6 @@ exports.getImprovedModularity = (graph, nodeSizeArray, edges) => {
 		for (j = 0; j < community.length; j++) {
 			B += nodeSizeArray[community[j]];
 		}
-
-		console.log(`i: ${i}, A: ${A}, B: ${B}, m2: ${m2}\n`);
 		// modularity += A - B^2 / 2m
 		modularity += A - B * B / m2;
 	}

@@ -60,7 +60,7 @@ analysis = text =>
 
 		console.log(`nodes.length: ${result.nodes.length}`);
 		let communitized = community.findCommunities(result.nodes, result.edges,
-			result.nodeSizeArray, result.nodeSizeNeighborArray);
+			result.nodeSizeArray, result.nodeSizeNeighborArray, 1);
 
 		result.edges_communitized                  = communitized.edges;
 		result.numberOfEdges_communitized          = result.edges_communitized.length;

@@ -57,7 +57,7 @@ addData = (d3data, cited, edges, is_deleted, nodeSizeNeighborArray) => {
 			"source": source,
 			"target": target,
 			"intersect_ratio": intersect_ratio / max_intersect_ratio,
-			"is_deleted": is_deleted
+			"is_deleted": (is_deleted) ? 'Y' : 'N'
 		});
 	}
 };
