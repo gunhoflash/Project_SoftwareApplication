@@ -124,7 +124,7 @@ exports.LabelPropagation =() =>{
 };
 
 exports.Louvain =(graph) =>{
-	//phase1
+	//사용할 변수, 리스트, 객체 세팅
 	console.log("I'm in Louvain");
 	/*
 	graph
@@ -135,7 +135,43 @@ exports.Louvain =(graph) =>{
 		- nodeSizeNeighborArray : 이웃노드 번호 배열
 		- nodeSizeArray : 이웃노드 개수 배열
 	*/
-	
+
+	var community_L = {	//community 정의
+		CID : null,
+		nodes : null,
+		edges : null	
+	};
+
+	var num_of_nodes=graph.nodes.length;
+	var i=0, j=0;
+	var randomized_node_list=[];
+	for(i=0; i<num_of_nodes; i++) //노드의 번호에 상관없이 랜덤한 노드를 선택하여 실행하기위한 리스트 생성
+	{
+		randomized_node_list[i]=Math.floor(Math.random()*(num_of_nodes+1));
+		for(j=0; j<i; j++)
+		{
+			if(randomized_node_list[i]==randomized_node_list[j])
+			{
+				i--;
+				break;
+			}
+		}
+	}
+	//console.log("randomized array : "+randomized_node_list);
+
+	for(i=0; i<num_of_nodes; i++)
+	{
+		
+	}
+
+	//phase1
+	for(i=0; i<num_of_nodes; i++)
+	{
+		for(j=0; j<graph.nodeSizeNeighborArray[i].length; j++)
+		{
+
+		}
+	}
 	//phase2
 
 
