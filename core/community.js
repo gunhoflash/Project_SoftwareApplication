@@ -320,68 +320,167 @@ exports.Louvain =(graph) =>{
 		- nodeSizeNeighborArray : 이웃노드 번호 배열
 		- nodeSizeArray : 이웃노드 개수 배열
 	*/
+	var edges=graph.edges;
 	var neighbors=graph.nodeSizeNeighborArray;
+	var num_of_neighbors=graph.nodeSizeArray;
 	var num_of_nodes=graph.nodes.length;
 	var num_of_edges=graph.edges.length;
 	var i=0, j=0, k=0, counter=0;
+	var randomized_node_list=[];
 	var node_list=[];
 	var community_list=[];
-	var edge_list=[];
-	for(i=0; i<num_of_nodes; i++) //노드의 번호에 상관없이 랜덤한 노드를 선택하여 실행하기위한 리스트 생성
-	{
-		node_list[i]={//node형태 정의
-			CID : null,
-			link_weight : 0;
-		};
-		community_list[i]={	//community 정의
-			nodes : [],
-			neighborCommunities : [],
-			inner_weight : 0,
-			tot_weight : 0	
-		};
+	var community_edge_list=[];
+	var is_in_array_result;
 
-		node_list[i].CID=Math.floor(Math.random()*(num_of_nodes));
+	for(i=0; i<num_of_nodes; i++)
+	{
+		randomized_node_list[i]=Math.floor(Math.random()*(num_of_nodes));
 		for(j=0; j<i; j++)
 		{
-			if(node_list[i].CID==node_list[j].CID)
+			if(randomized_node_list[i]==randomized_node_list[j])
 			{
 				i--;
 				break;
 			}
 		}
 	}
+	
+	console.log(randomized_node_list);
+	console.log(graph.edges);
+	console.log(num_of_neighbors);
 
-	for(i=0; i<num_of_nodes; i++)
+	for(i=0; i<num_of_nodes; i++)//making node list
 	{		
-		community_list[node_list[i].CID].nodes[0]=i; //community_list의 nodes 초기화
-	}
-
-	for(i=0; i<community_list.length; i++)
-	{		
-		for(j=0; j<neighbors[community_list[i].nodes[0]].length; j++)
-		{
-			community_list[i].neighborCommunities.push(node_list[neighbors[community_list[i].nodes[0]][j]].CID);//community_list의 neighborCommunities 초기화
+		node_list[randomized_node_list[i]]={
+			NID : randomized_node_list[i],
+			CID : i
 		}
 	}
-
-	counter=0;
-	for(i=0; i<community_list.length; i++)
+	for(i=0; i<num_of_edges; i++)//making edge list
+	{		
+		edge_list[i]={
+			edge : edges[i],
+			weight : 1
+		}
+	}
+	for(i=0; i<num_of_nodes; i++)//making community list
 	{
-		for(j=0; j<community_list[i].neighborCommunities.length; j++)
-		{
-			if(i<community_list[i].neighborCommunities[j])
-			{
-				edge_list[counter]={
-					edge : [],
-					weight : 0
-				};
-				edge_list[counter].edge[0]=i;
-				edge_list[counter].edge[1]=community_list[i].neighborCommunities[j];
-				edge_list[counter].weight+=1;
-				counter++;
-			}
+		community_list[i]={
+			nodes : [node_list[randomized_node_list[i]]],
+			inner_weight : 0,
+			total_weight : num_of_neighbors[randomized_node_list[i]],
+			neighborCommunities : []
 		}
 	}
+	for(i=0; i<num_of_edges; i++)
+	{
+		temp_community_edge=[node_list[edges[i][0]].CID,node_list[edges[i][1]].CID];
+		is_in_array_result=isInEdgeArray(community_edge_list,temp_community_edge)
+		if(is_in_array_result[0])
+		{
+			community_edge_list[is_in_array_result[1]].weight+=1;
+		}
+		else
+		{
+			community_edge_list.push({
+				edge : temp_community_edge,
+				weight : 1
+			})
+		}
+	}
+
+	for(i=0;i<num_of_nodes;i++)
+	{
+		console.log("node"+i);
+		console.log("["+node_list[i].NID+", "+node_list[i].CID+"]");
+	}
+	console.log("\nedge");
+	for(i=0;i<num_of_edges;i++)
+	{
+		console.log("["+edge_list[i].edge+", "+edge_list[i].weight+"]");
+	}
+	console.log("\n");
+	for(i=0;i<num_of_nodes;i++)
+	{
+		console.log("community"+i);
+		console.log("nodes : [");
+		for(j=0;j<community_list[i].nodes.length;j++)
+		{
+			console.log("["+community_list[i].nodes[j].NID+", "+community_list[i].nodes[j].CID+"]");
+		}		
+		console.log("]");
+		console.log("inner_weight : "+community_list[i].inner_weight);
+		console.log("total_weight : "+community_list[i].total_weight);
+		console.log("neighborCommunities : "+community_list[i].neighborCommunities+"\n");
+	}
+
+	
+	/*
+	var num_of_change=0;
+	
+	while(true)
+	{
+		//phase1
+		this.louvainPhase1(node_list,community_list, edge_list, num_of_change);
+		if(num_of_change==0)
+		{
+			break;
+		}
+		//phase2
+		this.louvainPhase2(community_list, edge_list, num_of_change);
+	}
+	*/
+};
+exports.isInEdgeArray=(community_edge_list,temp_community_edge)=>{
+	var counter=0;
+	var i=0;
+	var where=-1;
+	for(i=0; i<community_edge_list.length; i++)
+	{
+		if((coummunity_edge_list[i].edge[0]==temp_community_edge[0])&&(coummunity_edge_list[i].edge[1]==temp_community_edge[1]))
+		{
+			counter++;
+			where=i;
+		}		
+	}
+
+	if(counter==0)
+	{
+		return [false,-1];
+	}
+	else
+	{
+		return [true, where];
+	}
+}
+
+exports.louvainPhase1 =(node_list,community_list, edge_list, num_of_change) =>{
+	/*
+	var nlist=node_list;
+	var clist=community_list;
+	var elist=edge_list;
+	var numOfC=num_of_change;
+	var delta_M=0;
+	var max_delta_neighbor;
+	
+	for(i=0; i<clist.length; i++)
+	{
+		for(j=0; j<clist[i].neighborCommunities.length; j++)
+		{
+			delta_M=( ((clist[i].inner_weight+1)/sum_of_weight) - Math.pow((clist[i].tot_weight+),2))-((clist[i].inner_weight/sum_of_weight)-Math.pow(,2)-Math.pow(,2));
+			console.log(i+"	"+clist[i].neighborCommunities[j]);
+		}
+	}
+	*/
+}
+
+exports.louvainPhase2 =(community_list, edge_list, num_of_change) =>{
+}
+
+//dumpstation-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	/*
+		
+	*/
 	
 	/*
 	for(i=0; i<num_of_nodes; i++)
@@ -398,51 +497,3 @@ exports.Louvain =(graph) =>{
 		console.log(edge_list[i].edge+"	"+edge_list[i].weight);
 	}
 	*/
-
-
-	/*------------------------------------------------------------------------------------------------------------------------------------------------
-	community_list[i]
-		i : community ID
-		community_list[i].nodes : i community에 포함되는 노드 번호의 배열
-		community_list[i].neighborCommunities : i community와 이웃하는 community ID의 배열
-
-	node_list[i]
-		i : node ID
-		noed_list[i].CID : node i가 포함된 community의 ID
-	*/
-	var num_of_change=0;
-	
-	while(true)
-	{
-		//phase1
-		this.louvainPhase1(node_list,community_list, edge_list, num_of_change);
-		if(num_of_change==0)
-		{
-			break;
-		}
-		//phase2
-		this.louvainPhase2(community_list, edge_list, num_of_change);
-	}
-
-};
-
-exports.louvainPhase1 =(node_list,community_list, edge_list, num_of_change) =>{
-	var nlist=node_list;
-	var clist=community_list;
-	var elist=edge_list;
-	var numOfC=num_of_change;
-	var delta_M=0;
-	var max_delta_neighbor;
-	
-	for(i=0; i<clist.length; i++)
-	{
-		for(j=0; j<clist[i].neighborCommunities.length; j++)
-		{
-			delta_M=( ((clist[i].inner_weight+1)/sum_of_weight) - Math.pow((clist[i].tot_weight+),2))-((clist[i].inner_weight/sum_of_weight)-Math.pow(,2)-Math.pow(,2));
-			console.log(i+"	"+clist[i].neighborCommunities[j]);
-		}
-	}
-}
-
-exports.louvainPhase2 =(community_list, edge_list, num_of_change) =>{
-}
