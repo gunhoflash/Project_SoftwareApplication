@@ -330,11 +330,14 @@ exports.Louvain =(graph) =>{
 	for(i=0; i<num_of_nodes; i++) //노드의 번호에 상관없이 랜덤한 노드를 선택하여 실행하기위한 리스트 생성
 	{
 		node_list[i]={//node형태 정의
-			CID : null
+			CID : null,
+			link_weight : 0;
 		};
 		community_list[i]={	//community 정의
 			nodes : [],
-			neighborCommunities : []	
+			neighborCommunities : [],
+			inner_weight : 0,
+			tot_weight : 0	
 		};
 
 		node_list[i].CID=Math.floor(Math.random()*(num_of_nodes));
@@ -408,13 +411,38 @@ exports.Louvain =(graph) =>{
 		noed_list[i].CID : node i가 포함된 community의 ID
 	*/
 	var num_of_change=0;
-	var delta_M;
-	//phase1
-	this.louvainPhase1();
-	//phase2
-
+	
+	while(true)
+	{
+		//phase1
+		this.louvainPhase1(node_list,community_list, edge_list, num_of_change);
+		if(num_of_change==0)
+		{
+			break;
+		}
+		//phase2
+		this.louvainPhase2(community_list, edge_list, num_of_change);
+	}
 
 };
 
-exports.louvainPhase1 =(community_list, edge_list) =>{
+exports.louvainPhase1 =(node_list,community_list, edge_list, num_of_change) =>{
+	var nlist=node_list;
+	var clist=community_list;
+	var elist=edge_list;
+	var numOfC=num_of_change;
+	var delta_M=0;
+	var max_delta_neighbor;
+	
+	for(i=0; i<clist.length; i++)
+	{
+		for(j=0; j<clist[i].neighborCommunities.length; j++)
+		{
+			delta_M=( ((clist[i].inner_weight+1)/sum_of_weight) - Math.pow((clist[i].tot_weight+),2))-((clist[i].inner_weight/sum_of_weight)-Math.pow(,2)-Math.pow(,2));
+			console.log(i+"	"+clist[i].neighborCommunities[j]);
+		}
+	}
+}
+
+exports.louvainPhase2 =(community_list, edge_list, num_of_change) =>{
 }
