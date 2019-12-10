@@ -51,8 +51,8 @@ exports.findCommunities = (_nodes, _edges, _nodeSizeArray, _nodeSizeNeighborArra
 	if (unlink_step_size == 'AUTO')
 		unlink_step_size = parseInt(edges.length / 1000) + 1;
 
-	console.log(`start communitization. step size: ${unlink_step_size}, init state:`);
-	console.log(maximumModularityState);
+	//console.log(`start communitization. step size: ${unlink_step_size}, init state:`);
+	//console.log(maximumModularityState);
 
 	while (true) {
 		//console.log(`communitizatiton`);
@@ -60,8 +60,8 @@ exports.findCommunities = (_nodes, _edges, _nodeSizeArray, _nodeSizeNeighborArra
 
 		// break if there is no edge
 		if (edges.length == 0) {
-			console.log(`end communitization. final state:`);
-			console.log(maximumModularityState);
+			//console.log(`end communitization. final state:`);
+			//console.log(maximumModularityState);
 			break;
 		}
 
@@ -141,7 +141,7 @@ exports.findCommunities = (_nodes, _edges, _nodeSizeArray, _nodeSizeNeighborArra
 
 		// save if current state's modularity is higher than saved state
 		if (maximumModularityState.modularity < modularity) {
-			console.log(`new modularity! ${maximumModularityState.modularity} -> ${modularity}`);
+			//console.log(`new modularity! ${maximumModularityState.modularity} -> ${modularity}`);
 			saveState(graph, edges, modularity, nodeSizeArray, nodeSizeNeighborArray, deleted_edges);
 		}
 	}
@@ -228,7 +228,7 @@ exports.labelPropagation = (numberOfNodes, _nodeSizeNeighborArray, iteration_lim
 			}
 		}
 	}
-	console.log(`all nodes was colored`);
+	//console.log(`all nodes was colored`);
 	//console.log(colors);
 	//console.log(color_groups);
 
@@ -238,7 +238,7 @@ exports.labelPropagation = (numberOfNodes, _nodeSizeNeighborArray, iteration_lim
 	for (i = 0; i < numberOfNodes; i++) {
 		communites[i] = i;
 	}
-	console.log(`all communities are initialized`);
+	//console.log(`all communities are initialized`);
 	//console.log(communites);
 
 	/*
@@ -247,7 +247,7 @@ exports.labelPropagation = (numberOfNodes, _nodeSizeNeighborArray, iteration_lim
 	let _numberOfCommunities = [];
 	for (i = 0; i < numberOfNodes; i++)
 	_numberOfCommunities[i] = 0;
-	console.log(`start LPA`);
+	//console.log(`start LPA`);
 	while(counter<iteration_limit) { //break when can't get result in (iteration_limit) iterations 
 		//console.log(`\n -- LPA --`);
 		let convergence = true;

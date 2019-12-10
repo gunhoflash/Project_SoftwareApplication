@@ -62,7 +62,7 @@ analysis = (text, radio_group, radio_node, radio_edge) =>
 
 		result.pageRank_Array         = core.pageRank(result.nodeSizeArray, result.nodeSizeNeighborArray, 0.0001);
 		result.HITS_Array             = core.HITS(text, 0.0001);
-		community.Louvain(result);
+		// community.Louvain(result);
 
 		result.deleted_edges = [];
 		switch (radio_group) {

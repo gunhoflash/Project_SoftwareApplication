@@ -161,17 +161,17 @@ exports.pageRank = (nodeSizeArray, nodeSizeNeighborArray, tolerance) => {
 		{
 			rank_sum+=new_R[i];//new_R의 rank_sum확인용
 		}
-		console.log("rank_sum : "+rank_sum);
+		//console.log("rank_sum : "+rank_sum);
 		//console.clear();
 		//console.log(new_R);
 		err=this.getError(old_R,new_R);
 		old_R=new_R;
 	}
 	while(err>tolerance);
-	console.log("err : "+err);//err가 tolerance를 만족하는지 확인용
+	//console.log("err : "+err);//err가 tolerance를 만족하는지 확인용
 	//console.log("out of loop");
 	//console.log(old_R);
-	console.log(old_R);
+	//console.log(old_R);
 	return old_R;//pageRank가 저장된 vector를 반납
 };
 
@@ -247,7 +247,7 @@ exports.HITS = (text,tolerance) => {
 				counter++;
 			}
 		}
-		console.log(counter);
+		//console.log(counter);
 		if(counter==length)
 		{
 			converged=true;
