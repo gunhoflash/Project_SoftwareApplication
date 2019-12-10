@@ -3,40 +3,32 @@
 
 <head>
 	<meta charset="utf-8">
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 	<style>
 		body {
 			height: 100vh;
 			margin: 0;
 		}
 
-		text {
-			font-family: sans-serif;
-			font-size: 10px;
-		}
-
-		svg {
-			width: 100%;
-			height: 100%;
-		}
-
 		textarea {
-			min-width: 8rem;
-			max-width: 8rem;
-   			max-height: 8rem;
-		}
-
-		button {
-			display: block;
-			margin: 1rem 0;
+			min-height: 3rem;
 		}
 
 		#floatbox {
-			position: fixed;
-			top: 1rem;
-			left: 1rem;
 			z-index: 10;
+		}
 
-			padding: 1rem;
+		#floatbox > div {
+			width: 16rem;
+		}
+
+		#button_fps {
+			white-space: nowrap;
+		}
+
+		#p_result {
+			max-height: 8rem;
+			overflow: auto;
 		}
 
 	</style>
@@ -48,14 +40,40 @@
 </head>
 
 <body>
-	<div id="floatbox">
-		<h1>Graphoto</h1>
-		<textarea id="input_text" rows="3" placeholder="type here"></textarea>
-		<p>or</p>
-		<input type="file" name="file" id="input_file">
-		<button id="button_sumbit" type="button">Submit</button>
-		<input type="number" name="fps" id="input_fps">
-		<button id="button_fps" type="button">Set FPS</button>
+	<div id="floatbox" class="vh-100 p-4 small position-fixed top-0 left-0">
+		<div class="h-100 pr-3 overflow-auto">
+			<p class="display-4">Graphoto</p>
+
+			<p class="font-weight-bold mt-4">Input</p>
+			<div class="mb-3">
+				<div class="input-group mb-2">
+					<div class="custom-file">
+						<input id="input_file" name="file" type="file" class="custom-file-input">
+						<label class="custom-file-label" for="input_file">Choose file</label>
+					</div>
+				</div>
+				<p class="mb-2">or type</p>
+				<textarea id="input_text" class="form-control" rows="3" placeholder="type here"></textarea>
+			</div>
+
+			<div class="custom-control custom-switch mb-2">
+				<input type="checkbox" class="custom-control-input" id="input_switch" checked>
+				<label class="custom-control-label" for="input_switch">Detect group</label>
+			</div>
+
+			<button id="button_sumbit" class="btn btn-block btn-primary" type="button">Submit</button>
+
+			<p class="font-weight-bold mt-4">Option</p>
+			<div class="input-group input-group-sm mb-3">
+				<input type="number" name="fps" id="input_fps" class="form-control">
+				<div class="input-group-append">
+					<button id="button_fps" class="btn btn-secondary" type="button">Set FPS</button>
+				</div>
+			</div>
+
+			<p class="font-weight-bold mt-4">Result</p>
+			<p id="p_result" class="text-break"></p>
+		</div>
 	</div>
 
 	<div id="cat" class="box">
@@ -67,7 +85,7 @@
 		</div>
 	</div>
 
-	<svg></svg>
+	<svg class="vh-100 w-100"></svg>
 	
 	<script>
 		var fps          = 30;
@@ -168,7 +186,8 @@
 				'#5D4037',
 				'#424242',
 			];
-			while (length--) {
+			length -= community_random_colors.length;
+			while (length-- > 0) {
 				plus   = parseInt(Math.random() * 3);
 				red    = Math.pow(Math.random(), 2);
 				green  = Math.pow(Math.random(), 2);
@@ -186,9 +205,9 @@
 		}
 
 		// load analyzed data from server and visualize
-		function visualize(result) {
+		function visualize(_data) {
 
-			var data = result.result;
+			var data = _data;
 
 			// handle exception: no result
 			if (data == null) return;
@@ -275,6 +294,7 @@
 
 			// set zoom in/out
 			svg.call(d3.zoom()
+				.scaleExtent([1, 1])
 				.scaleExtent([1/(128 + big_score), 8])
 				.on("zoom", function () {
 					svg.selectAll("g").attr("transform", d3.event.transform);
@@ -309,6 +329,24 @@
 			simulation.force("link").links(graph.links);
 		}
 
+		/*
+
+			Show result text.
+
+		*/
+		function show_result(result) {
+			let _ = result.result;
+			$('#p_result').html(`
+				Number of Nodes: ${_.numberOfNodes}<br>
+				Number of Edges: ${_.numberOfEdges}<br>
+				Number of Communities: ${_.numberOfCommunities}<br>
+				<br>
+				Modularity: ${_.modularity}<br>
+				Density: ${_.density}<br>
+			`);
+			visualize(_);
+		}
+
 		// show, hide cat
 		function display_cat(bool) {
 			$('#cat').css('display', bool ? '' : 'none');
@@ -331,7 +369,7 @@
 				data: formData,
 				contentType: false,
 				processData: false,
-				success: visualize,
+				success: show_result,
 				error: console.log
 			});
 		}
