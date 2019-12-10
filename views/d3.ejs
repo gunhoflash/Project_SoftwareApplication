@@ -14,11 +14,13 @@
 			min-height: 3rem;
 		}
 
-		#floatbox {
+		.floatbox {
 			z-index: 10;
+			display: flex;
+			flex-direction: column;
 		}
 
-		#floatbox > div {
+		.w-16 {
 			width: 16rem;
 		}
 
@@ -27,9 +29,11 @@
 		}
 
 		#p_result {
-			max-height: 8rem;
 			overflow: auto;
 		}
+
+		.bottom-0 { bottom: 0; }
+		.right-0  { right:  0; }
 
 	</style>
 
@@ -40,39 +44,88 @@
 </head>
 
 <body>
-	<div id="floatbox" class="vh-100 p-4 small position-fixed top-0 left-0">
-		<div class="h-100 pr-3 overflow-auto">
-			<p class="display-4">Graphoto</p>
+	<div class="floatbox vh-100 p-4 position-fixed top-0 left-0">
+		<div class="w-16 h-100 pr-3 overflow-auto">
+			<h1 class="font-weight-light mb-5">Graphoto</h1>
 
-			<p class="font-weight-bold mt-4">Input</p>
-			<div class="mb-3">
-				<div class="input-group mb-2">
-					<div class="custom-file">
-						<input id="input_file" name="file" type="file" class="custom-file-input">
-						<label class="custom-file-label" for="input_file">Choose file</label>
+			<h3 class="font-weight-light mb-3">Input</h3>
+			<div class="pl-3">
+				<div class="mb-3">
+					<div class="input-group mb-2">
+						<div class="custom-file">
+							<input id="input_file" name="file" type="file" class="custom-file-input">
+							<label class="custom-file-label" for="input_file">Choose file</label>
+						</div>
+					</div>
+					<p class="text-muted mb-2">or type</p>
+					<textarea id="input_text" class="form-control" rows="3" placeholder="type here"></textarea>
+				</div>
+			</div>
+
+			<h3 class="font-weight-light mb-3">Option</h3>
+			<div class="pl-3">
+				<label class="font-weight-light text-muted mb-2">Group Detection</label>
+				<div class="pl-2 mb-2">
+					<div class="custom-control custom-radio">
+						<input type="radio" id="input_radio_group_1" name="radio_group" value="1" class="custom-control-input">
+						<label class="custom-control-label" for="input_radio_group_1">(None)</label>
+					</div>
+					<div class="custom-control custom-radio">
+						<input type="radio" id="input_radio_group_2" name="radio_group" value="2" class="custom-control-input">
+						<label class="custom-control-label" for="input_radio_group_2">One Girvan Newman</label>
+					</div>
+					<div class="custom-control custom-radio">
+						<input type="radio" id="input_radio_group_3" name="radio_group" value="3" class="custom-control-input">
+						<label class="custom-control-label" for="input_radio_group_3">Quad Girvan Newman</label>
+					</div>
+					<div class="custom-control custom-radio">
+						<input type="radio" id="input_radio_group_4" name="radio_group" value="4" class="custom-control-input">
+						<label class="custom-control-label" for="input_radio_group_4">Auto Girvan Newman</label>
+					</div>
+					<div class="custom-control custom-radio">
+						<input type="radio" id="input_radio_group_5" name="radio_group" value="5" class="custom-control-input" checked>
+						<label class="custom-control-label" for="input_radio_group_5">Semi Label Propagation</label>
 					</div>
 				</div>
-				<p class="mb-2">or type</p>
-				<textarea id="input_text" class="form-control" rows="3" placeholder="type here"></textarea>
-			</div>
 
-			<div class="custom-control custom-switch mb-2">
-				<input type="checkbox" class="custom-control-input" id="input_switch" checked>
-				<label class="custom-control-label" for="input_switch">Detect group</label>
-			</div>
+				<label class="font-weight-light text-muted mb-2">Node Size</label>
+				<div class="pl-2 mb-2">
+					<div class="custom-control custom-radio">
+						<input type="radio" id="input_radio_node_1" name="radio_node" value="1" class="custom-control-input" checked>
+						<label class="custom-control-label" for="input_radio_node_1">Neighbor</label>
+					</div>
+					<div class="custom-control custom-radio">
+						<input type="radio" id="input_radio_node_2" name="radio_node" value="2" class="custom-control-input">
+						<label class="custom-control-label" for="input_radio_node_2">PageRank</label>
+					</div>
+					<div class="custom-control custom-radio">
+						<input type="radio" id="input_radio_node_3" name="radio_node" value="3" class="custom-control-input">
+						<label class="custom-control-label" for="input_radio_node_3">HITS</label>
+					</div>
+				</div>
 
-			<button id="button_sumbit" class="btn btn-block btn-primary" type="button">Submit</button>
-
-			<p class="font-weight-bold mt-4">Option</p>
-			<div class="input-group input-group-sm mb-3">
-				<input type="number" name="fps" id="input_fps" class="form-control">
-				<div class="input-group-append">
-					<button id="button_fps" class="btn btn-secondary" type="button">Set FPS</button>
+				<label class="font-weight-light text-muted mb-2">Edge Strength</label>
+				<div class="pl-2">
+					<div class="custom-control custom-radio">
+						<input type="radio" id="input_radio_edge_1" name="radio_edge" value="1" class="custom-control-input" checked>
+						<label class="custom-control-label" for="input_radio_edge_1">Neighborhood</label>
+					</div>
 				</div>
 			</div>
 
-			<p class="font-weight-bold mt-4">Result</p>
-			<p id="p_result" class="text-break"></p>
+			<button id="button_sumbit" class="btn btn-block btn-primary mt-3" type="button">Submit</button>
+		</div>
+	</div>
+
+	<div class="floatbox text-right vh-100 p-4 position-fixed top-0 right-0">
+		<h3 class="font-weight-light mb-3">Result</h3>
+		<p id="p_result" class="text-break"></p>
+
+		<div class="input-group input-group-sm mt-auto">
+			<input type="number" name="fps" id="input_fps" class="form-control">
+			<div class="input-group-append">
+				<button id="button_fps" class="btn btn-secondary" type="button">Set FPS</button>
+			</div>
 		</div>
 	</div>
 
@@ -86,7 +139,7 @@
 	</div>
 
 	<svg class="vh-100 w-100"></svg>
-	
+
 	<script>
 		var fps          = 30;
 		var frame        = 0;
@@ -247,12 +300,12 @@
 				.enter().append("line")
 				.attr("stroke-opacity", function (d) {
 					if (data.numberOfEdges < 100)
-						return d.intersect_ratio * 0.5 + 0.5;
+						return d.edge_strength / graph.maxEdgeStrength * 0.5 + 0.5;
 					if (data.numberOfEdges < 1000)
-						return d.intersect_ratio * 0.7 + 0.3;
+						return d.edge_strength / graph.maxEdgeStrength * 0.7 + 0.3;
 					if (data.numberOfEdges < 10000)
-						return d.intersect_ratio * 0.85 + 0.15;
-					return d.intersect_ratio * 0.9 + 0.1;
+						return d.edge_strength / graph.maxEdgeStrength * 0.85 + 0.15;
+					return d.edge_strength / graph.maxEdgeStrength * 0.9 + 0.1;
 				})
 				.attr("display", function (d) {
 					if (d.is_deleted == 'Y') return "none";
@@ -262,7 +315,7 @@
 					return Math.sqrt(d.intersect) + 1;
 				})
 				.attr("stroke", function (d) {
-					var rank = 1 - d.intersect_ratio;
+					var rank = 1 - d.edge_strength / graph.maxEdgeStrength;
 					var r = 16 + (Math.sqrt(1 - rank) * 239);
 					var g = 10 + ((rank < 0.3) ? 0 :
 						((rank < 0.6) ? rank / 0.6 * 230 : Math.sqrt((1 - rank) / 0.4) * 200) + 30);
@@ -341,6 +394,12 @@
 				Number of Edges: ${_.numberOfEdges}<br>
 				Number of Communities: ${_.numberOfCommunities}<br>
 				<br>
+
+				Largest Node: ${_.d3data.maxNode}(size: ${_.d3data.maxNodeSize})<br>
+				Strongest Edge: ${_.d3data.maxEdge[0]} - ${_.d3data.maxEdge[1]}(strength: ${_.d3data.maxEdgeStrength})<br>
+				Maximum Size of Communities: ${_.maxSizeOfCommunities}<br>
+
+				<br>
 				Modularity: ${_.modularity}<br>
 				Density: ${_.density}<br>
 			`);
@@ -356,12 +415,20 @@
 		function submit() {
 			display_cat(true);
 
+			var radio_group = $('input[name=radio_group]:checked').val()
+			var radio_node  = $('input[name=radio_node]:checked').val()
+			var radio_edge  = $('input[name=radio_edge]:checked').val()
+
 			var formData = new FormData();
 				formData.append("input_text", $("#input_text").val());
 				formData.append("input_file", $("#input_file")[0].files[0]);
+				formData.append("radio_group", radio_group);
+				formData.append("radio_node", radio_node);
+				formData.append("radio_edge", radio_edge);
 
 			// clear previous graph
 			svg.selectAll("*").remove();
+			$('#p_result').html('');
 
 			$.ajax({
 				url: '/upload',

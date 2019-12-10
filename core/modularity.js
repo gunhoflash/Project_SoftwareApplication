@@ -116,13 +116,15 @@ exports.getModularity = (graph, nodeSizeArray, edges) => {
 				n1 = community[i];
 				n2 = community[j];
 				_a = (a[n1]) ? (a[n1][n2] || 0) : 0;
-				modularity += _a - (nodeSizeArray[n1] * nodeSizeArray[n2]);
+				
+				let c = (j == i) ? 1 : 2;
+				modularity += (_a - (nodeSizeArray[n1] * nodeSizeArray[n2])) * c;
 			}
 		}
 	}
 	
 	// return normalized modularity (-1 ~ 1 expected)
-	return modularity * 2 / (m2 * m2);
+	return modularity / (m2 * m2);
 };
 
 /*
@@ -134,11 +136,19 @@ exports.getModularity = (graph, nodeSizeArray, edges) => {
 */
 exports.getImprovedModularity = (graph, nodeSizeArray, edges) => {
 
+	console.log(`calculate modularity`);
+
 	// handle exception: graph or edges is not an array
-	if (!Array.isArray(graph) || !Array.isArray(edges)) return 0;
+	if (!Array.isArray(graph) || !Array.isArray(edges)) {
+		console.log(`invalid parameter`);
+		return 0;
+	}
 
 	// handle exception: no edges
-	if (edges.length == 0) return 0;
+	if (edges.length == 0) {
+		console.log(`no edges`);
+		return 0;
+	}
 
 	let i, j, m2;
 	let edges_inner = [];
@@ -167,12 +177,15 @@ exports.getImprovedModularity = (graph, nodeSizeArray, edges) => {
 
 		// calculate A = sum(A_ij)
 		A = edges_inner[i].length * 2;
-
+		console.log(`A = ${A}`);
+		
 		// calculate B = sum(total)
 		B = 0;
 		for (j = 0; j < community.length; j++) {
 			B += nodeSizeArray[community[j]];
 		}
+		console.log(`B = ${B}`);
+		console.log(`add ${A - B * B / m2}`);
 		// modularity += A - B^2 / 2m
 		modularity += A - B * B / m2;
 	}

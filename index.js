@@ -26,8 +26,12 @@ app.post('/upload', upload.single('input_file'), (req, res) => {
 	let path = req.file ? req.file.path : null;
 	if (path) text = core.getText(path);
 
+	let radio_group = parseInt(req.body.radio_group);
+	let radio_node = parseInt(req.body.radio_node);
+	let radio_edge = parseInt(req.body.radio_edge);
+
 	// analyze text
-	analysis(text)
+	analysis(text, radio_group, radio_node, radio_edge)
 	.then(result => {
 		res.json({ result: result });
 	}, err => {
@@ -42,7 +46,7 @@ app.post('/upload', upload.single('input_file'), (req, res) => {
 	});
 });
 
-analysis = text =>
+analysis = (text, radio_group, radio_node, radio_edge) =>
 	new Promise((resolve, reject) => {
 		console.log(`start analysis`);
 		if (!text) return reject(`invalid input to analyze`);
@@ -56,35 +60,52 @@ analysis = text =>
 		result.nodeSizeNeighborArray  = core.getNodeSizeNeighborArray(result.edges);
 		result.nodeSizeArray          = core.getNodeSizeArray(result.edges);
 
-		result.modularity             = modularity.getImprovedModularity([result.nodes], result.nodeSizeArray, result.edges);
-		let labelPropagationGraph     = community.labelPropagation(result.numberOfNodes, result.nodeSizeNeighborArray);
-		result.numberOfCommunities    = labelPropagationGraph.length;
-
-		//throw Error("hehehehehehe");
-
-		console.log(`nodes.length: ${result.nodes.length}`);
-		/*let communitized = community.findCommunities(result.nodes, result.edges,
-			result.nodeSizeArray, result.nodeSizeNeighborArray, 1);
-
-		result.edges_communitized                  = communitized.edges;
-		result.numberOfEdges_communitized          = result.edges_communitized.length;
-		result.nodeSizeNeighborArray_communitized  = communitized.nodeSizeNeighborArray;
-		result.nodeSizeArray_communitized          = communitized.nodeSizeArray;
-		result.modularity_communitized             = communitized.modularity;
-		result.deleted_edges                       = communitized.deleted_edges;
-*/
-		result.d3data                 = d3data.getD3(labelPropagationGraph, result.edges, [], result.nodeSizeNeighborArray);
-		//result.d3data                 = d3data.getD3(result.edges, [], result.nodeSizeNeighborArray);
-
-		result.density                = 2 * result.numberOfEdges / (result.numberOfNodes * (result.numberOfNodes - 1));
-
-		//우빈 중간결과 확인용
 		result.pageRank_Array         = core.pageRank(result.nodeSizeArray, result.nodeSizeNeighborArray, 0.0001);
 		result.HITS_Array             = core.HITS(text, 0.0001);
 		community.Louvain(result);
-		
-		// TODO: count the number of networks
 
+		result.deleted_edges = [];
+		switch (radio_group) {
+			// Girvan Newman
+			case 2:
+			case 3:
+			case 4:
+				let unlink_step_size;
+				if (radio_group == 2) unlink_step_size = 1;
+				if (radio_group == 3) unlink_step_size = 4;
+				if (radio_group == 4) unlink_step_size = 'AUTO';
+				let girvan_newman = community.findCommunities(
+					result.nodes, result.edges,
+					result.nodeSizeArray, result.nodeSizeNeighborArray,
+					result.pageRank_Array, unlink_step_size);
+				result.graph         = girvan_newman.graph;
+				result.deleted_edges = girvan_newman.deleted_edges;
+				break;
+			// Label Propagation
+			case 5:
+				result.graph = community.labelPropagation(result.numberOfNodes, result.nodeSizeNeighborArray);
+				break;
+
+			// (None)
+			case 1:
+			default:
+				result.graph = [result.nodes];
+				break;
+		}
+
+		let nodeSizes;
+		switch (radio_node) {
+			case 2:          nodeSizes = result.pageRank_Array;     break;
+			case 3:          nodeSizes = result.HITS_Array['hubs']; break;
+			case 1: default: nodeSizes = result.nodeSizeArray;      break;
+		}
+
+		result.modularity          = modularity.getModularity(result.graph, result.nodeSizeArray, result.edges);
+		result.numberOfCommunities = result.graph.length;
+		result.density             = 2 * result.numberOfEdges / (result.numberOfNodes * (result.numberOfNodes - 1));
+
+		result.d3data                 = d3data.getD3(result.graph, result.edges, result.deleted_edges, nodeSizes, result.nodeSizeNeighborArray);
+		result.maxSizeOfCommunities   = community.maxSizeOfCommunities(result.graph);
 		console.log(`end analysis`);
 		resolve(result);
 	});

@@ -11,6 +11,15 @@ const maximumModularityState = {
 	deleted_edges: []
 };
 
+exports.maxSizeOfCommunities = (graph) => {
+	let size = 0;
+	for (let nodes of graph) {
+		if (nodes.length > size)
+			size = nodes.length;
+	}
+	return size;
+};
+
 /*
 	nodes: [node, node, ..., node]
 	edges: [edge, edge, ..., edge]
@@ -33,7 +42,7 @@ exports.findCommunities = (_nodes, _edges, _nodeSizeArray, _nodeSizeNeighborArra
 	let ind1, ind2;
 
 	// calulate modularity and edge betweenesses
-	modularity = MODULARITY.getImprovedModularity(graph, nodeSizeArray, edges);
+	modularity = MODULARITY.getModularity(graph, nodeSizeArray, edges);
 	edges = EDGE.neighborhoods(edges, nodeSizeNeighborArray, pageRank);
 
 	// save initial state
@@ -117,7 +126,7 @@ exports.findCommunities = (_nodes, _edges, _nodeSizeArray, _nodeSizeNeighborArra
 		}
 
 		// calculate new modularity
-		modularity = MODULARITY.getImprovedModularity(graph, nodeSizeArray, edges);
+		modularity = MODULARITY.getModularity(graph, nodeSizeArray, edges);
 
 		/*
 			TODO: save the maximized-modularity status and loop it until
@@ -149,13 +158,9 @@ saveState = (graph, edges, modularity, nodeSizeArray, nodeSizeNeighborArray, del
 	maximumModularityState.deleted_edges         = ARRAY.clone_deep(deleted_edges);
 };
 
-exports.LinkCommunity =() =>{
-
-};
-
 // semi only
 // refer to https://www.isislab.it/cordasco/papers/BASNA10/BASNA_pres.pdf from https://www.nature.com/articles/srep30750
-exports.labelPropagation = (numberOfNodes, _nodeSizeNeighborArray, iteration_limit) => {
+exports.labelPropagation = (numberOfNodes, _nodeSizeNeighborArray, iteration_limit = 100000000) => {
 
 	let i, j, k;
 	let nodeSizeNeighborArray = ARRAY.clone_deep(_nodeSizeNeighborArray);
